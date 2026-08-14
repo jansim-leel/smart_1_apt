@@ -1,0 +1,1705 @@
+<!--
+  apartment-compare v5.9.16
+  변경사항 (v5.9.15 → v5.9.16):
+  - [6개월 이동 버튼: 이중 화살표 → 박스로 감싼 단일 화살표] ◀◀/▶▶(문자 2개, 폭이 넓어 다시
+    두 줄로 밀리는 원인)를 ◀/▶ 단일 문자 + 네모 박스(이중 테두리 box-shadow)로 감싸는
+    방식으로 변경. 1개월 버튼(◀▶, 얇은 홑 테두리)과는 "박스로 한 번 더 감쌌는지"로
+    시각적 구분되고, 문자 수가 절반으로 줄어 버튼 폭도 좁아짐(모바일 한 줄 유지 목적).
+  변경사항 (v5.9.14 → v5.9.15):
+  - [6개월 이동 버튼 아이콘 변경] ⏪⏩(미디어 재생 아이콘) → ◀◀▶▶(기존 ◀▶와 통일감 있는
+    이중 화살표)로 변경. 동작은 동일.
+  - [비교 결과에 조회 기간 표시] "④ 비교 결과" 제목 아래에 실제 조회된 시작월 → 종료월을
+    작게 표시(예: "2025.03 → 2026.06 기준"). 이전에는 조회 기간이 결과 화면에 안 보여서
+    ①번 요청(2줄 배치 등)이 반영됐는지 확인이 어려웠던 문제 해소.
+  변경사항 (v5.9.13 → v5.9.14):
+  - [시작월/종료월 6개월 빨리감기 버튼 추가] 기존 ◀▶(1개월 이동) 양옆에 ◀◀▶▶(6개월 이동)
+    버튼 추가. 동작 방식은 1개월 이동과 동일(캐시 활용, 즉시 조회). 이동 결과가 반대쪽
+    월을 넘어서게 되면(예: 시작월을 +6 이동했는데 종료월보다 미래가 됨) 이동을 막고
+    안내 메시지 표시 — 1개월 이동 버튼에도 동일한 경계 체크 적용.
+  변경사항 (v5.9.12 → v5.9.13, 모바일 UI 개선):
+  - [시작월/종료월을 2줄로 분리] 한 줄에 같이 있으면 좁은 화면에서 종료월 쪽이 다음 줄로
+    밀려 보기 나쁘던 문제 → 시작월/종료월을 각각 독립된 줄로 배치.
+  - [화면 하단 고정 "조회하기" 버튼 삭제] 비교 기간 섹션 안의 "조회하기"와 기능이 중복되어
+    혼란을 주던 sticky 바 제거. 관련 JS(compareBtnMobile 참조)도 함께 정리.
+  - [사용법 안내 문단을 접기/펼치기로 변경] 항상 펼쳐져 있던 4줄짜리 안내문을 "ⓘ 사용법"
+    토글 버튼 클릭 시에만 펼쳐지도록 변경(기본값: 접힘).
+  - [우측 하단 "맨 위로" 버튼 삭제] 하단 고정 바와 가까워 오탭 우려가 있던 플로팅 버튼과
+    관련 스크롤 리스너 제거.
+  변경사항 (v5.9.11 → v5.9.12):
+  - [DJ 프리셋 평형 수정] "영등포푸르지오" 전용면적을 79 → 73으로 변경(공급 100/전용 73 기준).
+    ⚠ 이 도구는 국토부 실거래가 매칭에 전용면적만 사용하며 공급면적 필드는 별도로 저장하지
+    않음 — 공급 100은 참고용이고 실제 매칭 기준값인 전용 73만 코드에 반영됨.
+  변경사항 (v5.9.10 → v5.9.11):
+  - [비교 기간: ◀▶ 한 달 이동 버튼 추가] 시작월/종료월 입력창 양옆에 ◀/▶ 버튼 추가. 누르면
+    해당 월이 ±1개월 이동하며 즉시 조회까지 실행됨(캐시 덕분에 이미 조회했던 월이면 API
+    호출 없이 바로 뜸). 정확한 값은 기존처럼 타이핑, 근처 달 탐색은 버튼으로 빠르게.
+    타이핑 중에는 실시간으로 형식(6자리 숫자, 01~12월)을 확인해 잘못된 값이면 테두리를
+    빨갛게 표시. 모바일에서 숫자 키패드가 바로 뜨도록 inputmode="numeric" 추가.
+  - [관심단지 프리셋 "선택 추가" → 클릭 즉시 토글로 변경] 체크박스로 여러 개 고른 뒤 맨 아래
+    "선택한 단지 추가" 버튼을 눌러야 했던 방식이 불편하다는 피드백으로, 각 프리셋 항목
+    자체를 버튼화해 클릭 한 번으로 즉시 추가/제거되도록 변경(다시 누르면 제거, 이미 추가된
+    항목은 체크 표시+강조). ① 보유 아파트의 HS/DJ/YW/JW 토글 버튼과 동일한 상호작용 방식으로
+    통일. 스크롤해서 별도 버튼을 찾아 누를 필요 없어짐.
+  변경사항 (v5.9.9 → v5.9.10):
+  - [UI를 텍스트 입력 + 버튼 클릭 방식으로 원복] v5.9.8~9.9에서 시도한 슬라이더/월 선택기 +
+    자동 반영 방식은 "값을 고르는" 상호작용이라 오히려 키보드로 YYYYMM을 직접 타이핑하는
+    것보다 느리다는 피드백을 받아 되돌림. 시작월/종료월 다시 텍스트 입력(YYYYMM)으로,
+    조회도 다시 버튼을 눌러야 실행되는 방식으로 복귀.
+  - [조회 캐시를 기본적으로 유지 — 기간 미세조정 시 즉시 반영] 핵심 개선점: "조회하기" 버튼은
+    더 이상 조회할 때마다 캐시를 비우지 않음. 예를 들어 시작월 202503/종료월 202606으로
+    한 번 조회한 뒤, 종료월만 202607로 바꿔 다시 "조회하기"를 누르면 시작월(202503) 쪽
+    데이터는 캐시에서 즉시 재사용되고 종료월(202607)만 새로 API를 호출 — 기간을 한 달씩
+    옮겨가며 미세조정할 때 체감 속도가 크게 빨라짐. ⚠ 월평균 계산 로직(이상치 필터링,
+    대체월 탐색 등)은 전혀 변경되지 않았음 — 어떤 원본 데이터를 쓰느냐(캐시 vs 새 API
+    호출)만 바뀐 것이고, 그 데이터로 평균을 구하는 방식은 기존과 100% 동일.
+  - [🔄 새로고침 버튼 추가] "조회하기" 옆에 별도로 "🔄 새로고침" 버튼 추가. 이 버튼을 누르면
+    캐시를 비우고 국토부 API를 처음부터 다시 호출 — 당일 새로 올라온 실거래 신고 등 최신
+    데이터를 강제로 반영하고 싶을 때 사용.
+  변경사항 (v5.9.8 → v5.9.9):
+  - [비교 기간: 슬라이더 → 네이티브 월 선택기로 변경] 직전 버전에서 넣은 range 슬라이더가
+    "촘촘해서 정확한 월을 짚기 어렵고, 실수로 옆 달을 찍어도 그게 그대로 확정되어 조회가
+    나가버린다"는 피드백을 받아 `<input type="month">`(브라우저/OS 기본 월 선택 캘린더)로
+    교체. 값을 실제로 클릭해 확정할 때만 change 이벤트가 뜨는 방식이라 중간값이 실수로
+    확정되는 문제가 구조적으로 사라짐. 자동 반영/디바운스/캐시 유지/최신요청우선 로직은
+    v5.9.8과 동일하게 유지.
+  변경사항 (v5.9.7 → v5.9.8):
+  - [비교 기간을 슬라이더로 변경 + 자동 반영] 시작월/종료월 텍스트 입력을 슬라이더로 교체.
+    드래그 중엔 라벨만 갱신되고, 손을 떼는 순간(change 이벤트, 짧은 디바운스 포함) 자동으로
+    비교 결과가 갱신됨 — "비교하기" 버튼을 매번 누를 필요 없음.
+    · 시작<종료 순서가 깨지면 에러를 띄우는 대신 반대쪽 슬라이더를 자동으로 같은 월까지 당겨
+      항상 유효한 구간을 유지.
+    · 조회 중 더 최신 조작이 들어오면(예: 첫 조회가 끝나기 전에 슬라이더를 또 옮긴 경우) 토큰
+      기반으로 낡은 응답은 버리고 최신 결과만 화면에 반영.
+    · 지역/월별 조회 캐시(monthDataCache)를 슬라이더 자동 반영 시에는 비우지 않도록 변경 —
+      이미 조회했던 기간으로 슬라이더를 다시 옮기면 API 호출 없이 즉시 결과가 뜸. 기존
+      "비교하기" 버튼은 "🔄 새로고침"으로 이름을 바꾸고, 누르면 캐시를 비우고 강제로
+      다시 조회(당일 새로 올라온 실거래 신고를 반영하고 싶을 때 사용).
+  변경사항 (v5.9.6 → v5.9.7):
+  - [버그 수정] JW 보유 아파트 프리셋의 단지명이 "가락우성1차"로 잘못 등록되어 있어 국토부 API에서
+    단지명이 한 번도 조회되지 않아 가격 조회가 실패하던 문제 수정. 서울 송파구 드롭다운 기준 실제
+    등록명인 "우성"으로 수정(주소/지역코드/평형은 기존과 동일하게 유지).
+
+  변경사항 (v5.9.5 → v5.9.6):
+  - [보유 아파트 모두 삭제 버튼 추가] ① 내가 보유한 아파트 영역에도 관심 아파트와 동일한 "🗑 모두
+    삭제" 버튼 추가.
+  - [지인 프리셋: 사람별로 결과 행 분리] HS/DJ/YW/JW 버튼은 공동소유가 아니라 각자 개별 소유를
+    표현하기 위한 것이므로, 기존에 활성화된 모든 지인의 아파트를 하나의 "보유 합산" 행으로 합치던
+    것을 사람(owner)별 별도 행으로 분리. HS만 켜면 "HS 합산" 1행, HS+JW를 함께 켜면 "HS 합산"과
+    "JW 합산"이 별개 행으로 표시됨(더 이상 두 사람 금액을 합치지 않음). 직접 검색해서 추가한
+    아파트(지인 프리셋 아님)는 기존처럼 "보유 합산 (아파트명 + ...)" 한 행으로 유지.
+    그 사람의 아파트를 전부 찾지 못한 경우 별도 에러 안내로 표시.
+  - [프리셋 이름 오류 수정] DJ의 "영등포 푸르지오" → 국토부 등록명 확인 결과 "영등포푸르지오"(띄어쓰기
+    없음)로 수정. 보유 아파트 탭에서 이 아파트가 조회되지 않던 원인이었음(API 호출 로직 자체는
+    관심/보유 동일하게 아파트명 완전일치로 정상 동작 중이었고, 프리셋에 등록해둔 이름 자체가
+    국토부 등록명과 달랐던 것). "가락우성1차"는 아직 미확인 — 실제 등록명이 다르면 알려주면 수정.
+  변경사항 (v5.9.4 → v5.9.5):
+  - [단지 검색 범위를 항상 최근 1년으로] "지역 전체에 최근 3개월간 거래가 없을 때만 6개월로 확장"하던
+    조건부 로직을 없애고, 지역 상태와 무관하게 항상 최근 1년(12개월)치를 조회해 단지/평형 목록을
+    만들도록 변경. (기존 로직은 "그 지역 다른 단지가 최근에 거래됐다"는 이유만으로, 정작 찾는 단지
+    자체는 몇 달간 거래가 없으면 목록에 아예 안 뜨는 문제가 있었음 — 판단 단위가 지역 전체였지 개별
+    단지가 아니었기 때문). 이제 최근 1년 내 거래가 한 번이라도 있던 단지/평형이면 노출됨.
+    동시요청은 MAX_CONCURRENT_REQUESTS(4개)로 제한되고 같은 지역/달 조회는 캐시되므로, 반복 검색
+    비용은 크게 늘지 않음. "⭐주력" 관련 안내 문구도 "최근 3개월" → "최근 1년" 기준으로 함께 수정.
+  - [지인 보유 아파트 프리셋 버튼 추가] ① 보유 아파트 영역에 HS/DJ/YW/JW 이니셜 토글 버튼 추가.
+    누르면 그 사람의 보유 아파트(들)가 목록에 추가되고, 다시 누르면 제거됨(여러 명 동시 활성화
+    가능). 각 프리셋으로 추가된 아파트는 칩에 이니셜 배지가 함께 표시됨.
+    · HS: 삼성래미안(전용79, 안양 만안구), 비산롯데캐슬(전용82, 안양 동안구) — 기존 기본값과 동일
+    · DJ: 영등포 푸르지오(전용79, 영등포구 영등포동), 우미린제일풍경채(전용74~80, 화성 동탄구
+      석우동), 동탄역 시범한화 꿈에그린 프레스티지(전용101, 화성 동탄구 청계동)
+    · YW: 신나무실극동(전용84, 수원 영통구 영통동), 대원신동아(전용59, 수원 권선구 권선동)
+    · JW: 가락우성1차(전용58, 송파구 가락동)
+    ⚠ 이름/코드는 확인/웹 검색으로 채운 것이라 국토부 등록명과 다를 수 있음. 단지 검색에 안
+    잡히면 삭제 후 직접 검색해 추가.
+  - [보유 합산 결과 라벨을 이니셜 기준으로] ④ 비교 결과의 "보유 합산" 이름 표기를, 프리셋 버튼으로
+    추가된 아파트는 아파트명 대신 그 사람 이니셜로(중복 없이 1번만) 표시하도록 변경. 예: HS와 JW를
+    동시에 켰다면 "보유 합산 (HS + JW)". 수동으로 검색해 추가한 아파트(이니셜 없음)는 기존처럼
+    아파트명 그대로 표시.
+  변경사항 (v5.9.3 → v5.9.4):
+  - [버튼명 변경] "단지 목록 불러오기" → "단지 검색"으로 변경 (안내 문구/주석도 함께 수정).
+  - [관심 아파트 모두 삭제 버튼 추가] ② 관심 아파트 영역에 "🗑 모두 삭제" 버튼 추가. 확인창에서
+    개수 표시 후 승인하면 현재 관심 아파트 목록을 전부 비움(보유 아파트에는 영향 없음).
+  변경사항 (v5.9.2 → v5.9.3):
+  - [이상치 필터 개선 — 단일거래 이상치 미탐지 문제] 어떤 달의 유일한 거래가 이상치(예: 저층+
+    직거래로 시세보다 낮게 신고된 거래)여도 걸러지지 않던 문제를 다음 3가지로 개선:
+    1) 참고 데이터 확장: 당월 표본이 적을 때 비교 기준(정제 후 거래 2건 이상)이 만들어질 때까지
+       기존 2개월 고정 대신 최대 6개월 전까지 한 달씩 순차 확장 조회(가중치는 1개월 전 0.5,
+       2개월 전 0.25 ... 매달 절반씩 감소).
+    2) 직거래 여부 반영: 가격 비율만으로 추측하지 않고 국토부 상세자료의 거래유형(dealingGbn)
+       필드로 실제 "직거래" 신고 건을 판별해, 직거래는 기준값의 90% 미만(중개거래는 기존과 동일하게
+       70% 미만)이면 이상치로 간주하도록 별도 기준 적용.
+    3) 필터링 결과 0건 처리 변경: 기존엔 이상치 제외 결과가 0건이 되면(그 달 유일한 거래가 이상치로
+       판정된 경우 등) 안전장치로 원본을 그대로 사용했으나, 이제는 0건을 그대로 반환해 기존에 있던
+       대체월 탐색 로직(resolvePriceQueries)이 다음 후보 달을 찾도록 넘긴다. (①해제거래 ②저층 제외
+       단계는 기존과 동일하게 결과 0건이면 이전 단계로 되돌리는 안전장치 유지)
+  변경사항 (v5.9.1 → v5.9.2):
+  - [화성시 동탄 제외 지역(41590) 조회 실패 원인 확정] 2026년 2월 1일부로 화성시가
+    만세구/효행구/병점구/동탄구 4개 일반구로 분구되면서, 기존에 쓰던 시 전체 코드 41590이
+    더 이상 유효한 LAWD_CD가 아니게 된 것이 원인이었음(행정표준코드 기준 확인).
+    → 병점역아이파크캐슬(병점동)이 속한 정확한 코드는 41595(병점구)로 확인, 프리셋 지역명도
+    "화성시 동탄 제외 지역" → "화성시 병점구"로 수정.
+  - [드롭다운에 화성시 병점구 추가] 지역 선택 드롭다운의 화성시 항목을 41590 단일 코드에서
+    병점구(41595)/동탄구(41597)/효행구(41593)/만세구(41591) 4개 구 선택지로 교체.
+  변경사항 (v5.9.0 → v5.9.1):
+  - [프리셋 4개 삭제] 경희궁자이2단지, 여의도자이, 흑석리버파크자이, 판교푸르지오그랑블 삭제.
+    → 24개 → 32개(v5.9.0) → 28개.
+  - [단지명 수정] 사용자가 "단지 목록 불러오기"로 직접 확인한 국토부 등록명 기준으로 수정.
+    · 광교자연앤힐스테이트 → "자연앤힐스테이트"
+    · 매교역푸르지오SK뷰 → "매교역푸르지오SKVIEW"
+  - [화성시 동탄 제외 지역(41590) 조회 실패 관련] "단지 목록 불러오기"가 아예 안 되고
+    API 응답 실패가 뜬다는 리포트를 받음. 코드(41590)는 국토부 공식 법정동코드표와 대조해
+    문제없이 확인했지만, ⚠️ 이 환경에는 사용자의 개인 프록시 서버(Cloudflare Worker)에 접근할
+    네트워크 권한이 없어 실제로 그 요청을 재현/테스트해볼 수 없었습니다. 그래서 정확한 원인을
+    추측만으로 고치는 대신, 실패 시 에러 메시지에 프록시가 실제로 보낸 원문(raw body)까지
+    그대로 노출하도록 진단 정보를 보강했습니다(아래 [진단 정보 강화] 참고). 테스트하신 뒤
+    상태 메시지에 뜨는 정확한 문구(특히 "마지막 오류: " 뒤의 내용, 또는 상태줄의 "조회 실패: " 뒤의
+    내용)를 그대로 회신 주시면 그걸 보고 정확히 고칠 수 있습니다. ⚠️ 이 항목은 실제 검증 전이므로
+    "고쳐짐"이 아니라 "원인 파악을 위한 진단 도구 추가"로 봐주세요.
+  - [진단 정보 강화] fetchMonth가 HTTP 오류/파싱 불가 응답을 받았을 때, 상태 메시지에 응답 원문
+    앞부분(최대 300자)을 그대로 포함하도록 수정. searchCatalog 상태줄에도 지역코드와 조회 월을
+    함께 표시해 어떤 요청이 실패했는지 바로 알 수 있게 함.
+  변경사항 (v5.8.4 → v5.9.0):
+  - [프리셋 8개 추가] PRESET_WATCH_APTS를 24개 → 28개로 확장 (서울 2 + 경기 6 추가).
+    · 서울: 경희궁자이2단지(종로구), 여의도자이(영등포구)
+    · 경기: 판교푸르지오그랑블(성남 분당구), 산성역포레스티아(성남 수정구),
+      광교자연앤힐스테이트(수원 영통구), 매교역푸르지오SK뷰(수원 팔달구),
+      향촌롯데(안양 동안구), 병점역아이파크캐슬(화성시 동탄 제외 지역)
+    ⚠ 이름/코드는 웹 검색으로 확인했지만 국토부 API 등록명과 다를 수 있음. 안 잡히면 알려주세요.
+  - [결과 표 제거] ④ 비교 결과에서 막대차트 아래 있던 표(모바일에서 카드처럼 쭉 나열되던 부분)를
+    삭제. 막대차트만으로 정렬/비교가 가능하고, 항목 클릭 시 뜨는 상세 플로팅 창에서 표에 있던
+    모든 정보(시작월/종료월 평균, 상승금액/률 등)를 동일하게 확인할 수 있어 중복이라 판단.
+  - [단지 목록 불러오기 조회범위 확장] 특정 지역(예: 화성시 동탄 제외 지역)에서 최근 3개월치
+    거래가 없어 "단지가 하나도 안 나옴" 현상이 있었음. 코드(41590=화성시, 41597=동탄구)는 국토부
+    공식 법정동코드와 대조 확인해 문제없었기 때문에, 3개월 조회 결과가 비어있으면 자동으로
+    6개월치까지 넓혀 재조회하도록 개선. (그래도 안 나오면 프록시/API 쪽 이슈일 수 있어 확인 필요)
+  변경사항 (v5.8.3 → v5.8.4):
+  - [지역 배지 제거] 결과 막대/표에 넣었던 서울/경기 색 배지 제거 (요청에 따라 원복).
+  - [상세 보기 방식 변경] 보유합산 막대 클릭 → ④-1 표 펼침/접힘 방식이 불편하다는 피드백에 따라,
+    정렬된 결과 목록(막대차트/표) 어떤 항목이든 클릭하면 플로팅 창(모달)으로 상세 정보를 보여주는
+    방식으로 전면 교체. 기존 접기/펼치기 UI(④-1 표, 화살표 힌트)는 제거.
+  - [플로팅 창 내용] 관심 아파트: 주소(지역+동/지번), 평형, 시작월/종료월 평균가, 상승금액/상승률,
+    실거래 참고정보(건축연도, 시작월·종료월 실거래 층수 범위, 필터 적용 후 거래건수) 표시.
+    보유합산: 합산 시작/종료가·상승금액/률과 함께 구성 아파트별 내역(개별 상승액/률, 자산비중,
+    상승기여도)을 모달 안에 그대로 유지.
+  - [데이터 추가 확보] resolvePriceQueries가 평균가 계산에 쓰인 거래(matches)에서 건축연도(buildYear)와
+    층수 범위(최소~최대)를 함께 추출해 보관하도록 확장 (평균 계산 로직 자체는 변경 없음).
+  - 오버레이 바깥 클릭 또는 Esc 키로 닫힘, 닫기(✕) 버튼 제공.
+  변경사항 (v5.8.2 → v5.8.3):
+  - [버그 수정] "관심단지 프리셋 불러오기" 버튼 텍스트가 24개로 안 바뀌어 있던 것 수정 (20개 → 24개).
+  - [진행 상황 표시] 비교하기 실행 중 버튼 텍스트에 "계산 중... (N/24)" 형태로 진행 카운트 표시.
+    resolvePriceQueries에 onProgress 콜백을 추가해 라운드마다(및 종료 시) 완료된 단지 수를 보고.
+  - [보유합산 상세 내역 클릭-확장] ④-1 상세 내역(자산비중/기여도)을 항상 펼쳐두던 것에서, 결과 막대의
+    "보유합산" 항목을 클릭했을 때만 펼쳐지도록 변경 (다른 결과 정렬 시에는 접힌 상태 유지, 새 비교
+    실행 시 다시 접힘 상태로 초기화).
+  - [조회 실패 목록 접기] errorRows가 4개 이상이면 "⚠ N개 조회 실패 (펼쳐보기)" 버튼으로 접어서 표시,
+    3개 이하면 기존처럼 항상 펼쳐서 표시.
+  - [지역 배지] 결과 막대/표에서 정렬 기준(상승금액순/상승률순)은 그대로 유지한 채, 관심 아파트 항목
+    옆에 서울/경기 구분 배지를 색으로 추가해 24개가 섞여 있어도 스캔하기 쉽게 함.
+  - [프리셋 "선택 추가"] 기존 "전체 교체" 프리셋 불러오기 옆에 "선택 추가" 버튼을 추가.
+    체크박스로 원하는 단지만 골라 기존 관심 목록에 추가(중복 이름은 목록에서 제외).
+  - [모바일 "맨 위로" 버튼] 스크롤을 400px 이상 내리면 우측 하단에 작은 원형 버튼이 나타나
+    탭하면 맨 위로 부드럽게 스크롤.
+  변경사항 (v5.8.1 → v5.8.2):
+  - [관심 아파트 프리셋 재매핑] 사용자가 앱의 "단지 목록 불러오기"로 직접 확인한 실제 등록명 기준으로
+    27개 → 24개로 재조정.
+    · 엘스 → "잠실엘스"로 이름 수정
+    · 마포래미안푸르지오 → 여러 단지(1~4단지)로 나뉘어 있어 대장 단지인 "마포래미안푸르지오2단지"로 매핑
+    · 신흥역하늘채랜더스원 → 여러 단지(1~3단지)로 나뉘어 있어 대장 단지인 "신흥역하늘채랜더스원1단지"로 매핑
+    · 흑석리버파크자이 → 국토부 등록명과 동일 확인, 변경 없음
+    · 미사강변골든센트로 → 실제 등록명 "미사강변 골든 센트로"(띄어쓰기 포함)로 수정
+    · 목동신시가지7단지, 상계주공5단지, 효성해링턴플레이스 → 삭제 (사용자 확인 결과 제외)
+    id 번호를 preset-1~24로 순서대로 재정렬.
+  변경사항 (v5.8.0 → v5.8.1):
+  - [동시 요청 제한] fetchMonth에 슬롯 기반 대기열을 추가해 실제 fetch가 한 번에 최대 4개까지만
+    나가도록 제한. 프리셋이 27개로 늘며 병렬 요청이 많아져 "초당 서비스 요청제한 횟수 초과" 에러가
+    발생하던 문제 완화. 재시도 로직은 추가하지 않음(요청 수 자체를 줄이는 게 목적).
+  변경사항 (v5.7.0 → v5.8.0):
+  - [관심 아파트 프리셋] PRESET_WATCH_APTS를 20개 → 27개로 재구성 (서울 13개 + 경기 14개).
+    서울: 도곡렉슬, 반포자이, 헬리오시티, 잠실 리센츠, 잠실 엘스, 고덕그라시움,
+    올림픽파크포레온, 마포래미안푸르지오, 서울숲리버뷰자이, 이촌동 한가람,
+    목동신시가지(7단지 추정), 흑석리버파크자이, 상계주공(5단지 추정).
+    경기: 정자동 파크뷰, 위례센트럴자이, 신흥역하늘채랜더스원, 광교중흥에스클래스,
+    화서역파크푸르지오, 성복역롯데캐슬골드타운, 용인기흥 효성해링턴플레이스,
+    평촌더샵센트럴시티, 래미안 안양 메가트리아, 동탄역롯데캐슬, 광명역써밋플레이스,
+    미사강변골든센트로, 과천푸르지오써밋, 인덕원푸르지오엘센트로.
+    제외: 자연앤힐스테이트, 향촌롯데, 산성역포레스티아, 금천롯데캐슬골드파크1차,
+    판교푸르지오그랑블(판교 대신 정자동 파크뷰로 상징성 우선), 래미안송파파인탑.
+  - [이상치 판정] 당월 표본이 2건 이하일 때, 과거 2개월(당월 1.0 / 1개월전 0.5 / 2개월전 0.25 가중)
+    거래를 함께 참조해 기준 중위값(가중 중위값)을 계산하도록 개선. 미래월은 참조하지 않음.
+    표본이 3건 이상인 달은 기존과 동일하게 당월 자체 중위값만 사용.
+  - [평형 그룹핑] 인접 면적을 이어붙이는 방식(±2㎡ 이내)에 절대 상한(그룹 내 최대-최소 5㎡ 이내)을
+    추가해, 체이닝으로 서로 다른 구조의 평형까지 하나로 묶이는 것을 방지.
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>띨띨한 다주택 vs 똘똘한 1주택</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #FAF6EE; color: #3A332B;
+    font-family: 'Apple SD Gothic Neo','Malgun Gothic','Pretendard',sans-serif;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 20px 100px; }
+  .eyebrow { font-size: 12px; letter-spacing: 2px; color: #A97C34; margin-bottom: 8px; font-weight: 700; }
+  h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; line-height: 1.35; color: #2B241C; }
+  .sub { color: #6F6555; font-size: 14px; margin-bottom: 32px; }
+  .section {
+    background: #FFFDF8; border: 1px solid #E8DDC7; border-radius: 12px;
+    padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(60,45,10,0.04);
+  }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: #2B241C; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input, select {
+    background: #FFFFFF; border: 1px solid #DCCFAF; border-radius: 6px;
+    padding: 9px 10px; color: #3A332B; font-size: 13px; outline: none;
+  }
+  select { cursor: pointer; }
+  input.period-input-invalid { border-color: #C24545; background: #FBEAEA; }
+  button {
+    border: none; border-radius: 6px; padding: 9px 16px; font-weight: 700;
+    font-size: 13px; cursor: pointer;
+  }
+  .btn-primary { background: #B8863B; color: #FFFFFF; }
+  .btn-secondary { background: transparent; color: #A97C34; border: 1px solid #C7A669; }
+  /* 6개월 빨리감기 버튼: 화살표를 네모 박스로 한 번 더 감싸 1개월 버튼(◀▶)과 구분되도록 함 */
+  .btn-jump6 { border: 1px solid #C7A669; box-shadow: inset 0 0 0 2px #FFFDF8, inset 0 0 0 3px #C7A669; }
+  .btn-link { background: none; color: #3E6FD9; padding: 4px; }
+  .hint { font-size: 12px; color: #8A7F6E; margin-top: 8px; }
+  .error-box { margin-top: 12px; color: #A63A3A; font-size: 13px; background: #FBEAEA; padding: 10px; border-radius: 6px; }
+  .apt-chip {
+    display: flex; align-items: center; gap: 8px; background: #F3EBDA; border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; color: #3A332B;
+  }
+  .apt-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; color: #FFFFFF; border-radius: 4px; padding: 2px 6px; }
+  .badge-owned { background: #B8863B; }
+  .badge-watch { background: #3E6FD9; }
+  .remove-x { background: none; border: none; color: #8A7F6E; cursor: pointer; font-size: 14px; }
+  .toggle-btn { padding: 7px 14px; border-radius: 999px; font-size: 12px; border: 1px solid #DCCFAF; background: #FFFFFF; color: #8A7F6E; font-weight: 700; }
+  .toggle-btn.active { border-color: #B8863B; background: #B8863B; color: #FFFFFF; }
+  .toggle-btn.active .small { color: rgba(255,255,255,0.85); }
+  .bar-row { margin-bottom: 10px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .bar-track { background: #F0E8D6; border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 8px 10px; font-weight: 700; text-align: left; color: #8A7F6E; border-bottom: 1px solid #E8DDC7; }
+  td { padding: 8px 10px; border-bottom: 1px solid #F0E8D6; }
+  .up { color: #2F8F52; font-weight: 700; }
+  .down { color: #C24545; font-weight: 700; }
+  .small { font-size: 12px; color: #8A7F6E; }
+  .apt-search-block { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #DCCFAF; }
+  /* ── 아파트 상세 플로팅 창 ── */
+  .apt-detail-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(43,36,28,0.45);
+    z-index: 100; align-items: center; justify-content: center; padding: 20px;
+  }
+  .apt-detail-overlay.visible { display: flex; }
+  .apt-detail-modal {
+    background: #FFFDF8; border-radius: 14px; padding: 22px 20px; max-width: 420px; width: 100%;
+    max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 8px 30px rgba(60,45,10,0.25);
+  }
+  .apt-detail-close {
+    position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 18px;
+    color: #8A7F6E; cursor: pointer; padding: 6px; line-height: 1;
+  }
+  .apt-detail-title { font-size: 17px; font-weight: 800; margin-bottom: 4px; color: #2B241C; padding-right: 24px; }
+  .apt-detail-sub { font-size: 12px; color: #8A7F6E; margin-bottom: 16px; }
+  .apt-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-bottom: 14px; }
+  .apt-detail-item-label { font-size: 11px; color: #8A7F6E; margin-bottom: 2px; }
+  .apt-detail-item-value { font-size: 15px; font-weight: 700; color: #2B241C; }
+  .apt-detail-extra { font-size: 12px; color: #6F6555; border-top: 1px dashed #DCCFAF; padding-top: 12px; margin-top: 4px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">REAL ESTATE SWITCH ANALYZER</div>
+  <h1>띨띨한 다주택 vs 똘똘한 1주택</h1>
+  <div class="sub">보유 아파트 <b>합산 금액</b>과 관심 아파트 <b>개별 1채</b>의 월평균 실거래가 상승 금액·상승률을 국토부 데이터로 자동 계산합니다.</div>
+
+  <!-- 보유 아파트 -->
+  <div class="section">
+    <div class="section-title">① 내가 보유한 아파트</div>
+    <div class="row" style="margin-bottom:8px;">
+      <button class="btn-secondary" onclick="resetToDefaultOwned()">기본값으로</button>
+      <button class="btn-secondary" onclick="clearAllOwnedApts()">🗑 모두 삭제</button>
+      <span class="small">비산롯데캐슬(전용82) + 삼성래미안(전용79)으로 설정됩니다.</span>
+    </div>
+    <div class="row" style="margin-bottom:12px;" id="ownedGroupButtons"></div>
+    <div id="ownedList" class="apt-list"></div>
+    <div id="ownedSearchBlock"></div>
+  </div>
+
+  <!-- 관심 아파트 -->
+  <div class="section">
+    <div class="section-title">② 비교하고 싶은 아파트 (똘똘한 한채 후보)</div>
+    <div class="row" style="margin-bottom:12px;">
+      <button class="btn-secondary" onclick="loadPresetWatchApts()">⭐ 관심단지 28개 프리셋 불러오기 (전체 교체)</button>
+      <button class="btn-secondary" onclick="togglePresetPicker()">➕ 프리셋에서 선택 추가</button>
+      <button class="btn-secondary" onclick="clearAllWatchApts()">🗑 모두 삭제</button>
+      <span class="small">왼쪽은 현재 목록을 28개로 교체하고, 가운데는 목록은 유지한 채 원하는 단지를 눌러서 바로 추가/제거하고, 오른쪽은 현재 목록을 전부 비웁니다.</span>
+    </div>
+    <div id="presetPicker" style="display:none; margin-top:4px; margin-bottom:14px; padding:12px; background:#F8F3E7; border-radius:8px;">
+      <div class="small" style="margin-bottom:8px;">누르면 바로 추가/제거됩니다. 이미 목록에 있는 단지는 강조 표시됩니다.</div>
+      <div id="presetPickerList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
+      <div class="row">
+        <button class="btn-secondary" onclick="togglePresetPicker()">닫기</button>
+      </div>
+    </div>
+    <div id="watchList" class="apt-list"></div>
+    <div id="watchSearchBlock"></div>
+  </div>
+
+  <!-- 기간 -->
+  <div class="section">
+    <div class="section-title">③ 비교 기간 (월평균 거래가 기준)</div>
+    <div class="row">
+      <span class="small" style="width:44px;">시작월</span>
+      <button class="btn-secondary btn-jump6" style="padding:6px 10px;" onclick="stepMonth('startYm', -6)">◀</button>
+      <button class="btn-secondary" style="padding:6px 10px;" onclick="stepMonth('startYm', -1)">◀</button>
+      <input id="startYm" inputmode="numeric" style="width:100px; text-align:center;" placeholder="YYYYMM" maxlength="6" oninput="onPeriodInputTyped('startYm')" />
+      <button class="btn-secondary" style="padding:6px 10px;" onclick="stepMonth('startYm', 1)">▶</button>
+      <button class="btn-secondary btn-jump6" style="padding:6px 10px;" onclick="stepMonth('startYm', 6)">▶</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <span class="small" style="width:44px;">종료월</span>
+      <button class="btn-secondary btn-jump6" style="padding:6px 10px;" onclick="stepMonth('endYm', -6)">◀</button>
+      <button class="btn-secondary" style="padding:6px 10px;" onclick="stepMonth('endYm', -1)">◀</button>
+      <input id="endYm" inputmode="numeric" style="width:100px; text-align:center;" placeholder="YYYYMM" maxlength="6" oninput="onPeriodInputTyped('endYm')" />
+      <button class="btn-secondary" style="padding:6px 10px;" onclick="stepMonth('endYm', 1)">▶</button>
+      <button class="btn-secondary btn-jump6" style="padding:6px 10px;" onclick="stepMonth('endYm', 6)">▶</button>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn-primary" id="compareBtn" onclick="runCompare(false)">조회하기</button>
+      <button class="btn-secondary" id="refreshBtn" onclick="runCompare(true)">🔄 새로고침</button>
+    </div>
+    <div style="margin-top:8px;">
+      <button class="btn-link" style="padding:0; font-size:12px;" onclick="toggleUsageHint()">ⓘ 사용법 <span id="usageHintArrow">펼치기</span></button>
+    </div>
+    <div class="hint" id="usageHint" style="display:none;">◀▶ 버튼을 누르면 해당 월이 한 달 이동하며 바로 조회됩니다(조회했던 적 있는 월이면 즉시, 처음 보는 월이면 API 조회 후 반영). "조회하기"는 이전에 조회했던 월이면 캐시를 재사용해 바로 뜹니다. 당일 새로 올라온 실거래 신고까지 반영하고 싶을 때는 "새로고침"을 눌러주세요(캐시를 비우고 국토부 API를 다시 호출).</div>
+    <div id="compareError"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="section" id="resultsSection" style="display:none;">
+    <div class="section-title">④ 비교 결과 (월평균 거래가 기준)</div>
+    <div class="small" id="resultPeriodLabel" style="margin-bottom:4px;"></div>
+    <div class="small" style="margin-bottom:12px;">막대나 표의 각 항목을 누르면 상세 정보를 볼 수 있습니다.</div>
+    <div class="row" style="margin-bottom:16px;">
+      <button class="toggle-btn active" id="sortAmountBtn" onclick="setSort('amount')">상승금액순</button>
+      <button class="toggle-btn" id="sortRateBtn" onclick="setSort('rate')">상승률순</button>
+    </div>
+    <div id="barChart"></div>
+    <div id="errorRows" class="small" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<!-- 아파트 상세 플로팅 창 -->
+<div id="aptDetailOverlay" class="apt-detail-overlay" onclick="closeAptDetailModalOnOverlay(event)">
+  <div class="apt-detail-modal" onclick="event.stopPropagation()">
+    <button class="apt-detail-close" onclick="closeAptDetailModal()">✕</button>
+    <div id="aptDetailContent"></div>
+  </div>
+</div>
+
+<script>
+// ── 지역 코드: 시 먼저 선택 → 해당 시의 구 선택 (아래 9개 시만 제공) ──
+const REGION_GROUPS = [
+  { city: "서울시", districts: [
+      { label: "종로구", code: "11110" }, { label: "중구", code: "11140" },
+      { label: "용산구", code: "11170" }, { label: "성동구", code: "11200" },
+      { label: "광진구", code: "11215" }, { label: "동대문구", code: "11230" },
+      { label: "중랑구", code: "11260" }, { label: "성북구", code: "11290" },
+      { label: "강북구", code: "11305" }, { label: "도봉구", code: "11320" },
+      { label: "노원구", code: "11350" }, { label: "은평구", code: "11380" },
+      { label: "서대문구", code: "11410" }, { label: "마포구", code: "11440" },
+      { label: "양천구", code: "11470" }, { label: "강서구", code: "11500" },
+      { label: "구로구", code: "11530" }, { label: "금천구", code: "11545" },
+      { label: "영등포구", code: "11560" }, { label: "동작구", code: "11590" },
+      { label: "관악구", code: "11620" }, { label: "서초구", code: "11650" },
+      { label: "강남구", code: "11680" }, { label: "송파구", code: "11710" },
+      { label: "강동구", code: "11740" },
+  ]},
+  { city: "성남시", districts: [
+      { label: "분당구", code: "41135" }, { label: "수정구", code: "41131" },
+      { label: "중원구", code: "41133" },
+  ]},
+  { city: "수원시", districts: [
+      { label: "영통구", code: "41117" }, { label: "팔달구", code: "41115" },
+      { label: "권선구", code: "41113" }, { label: "장안구", code: "41111" },
+  ]},
+  { city: "용인시", districts: [
+      { label: "수지구", code: "41465" }, { label: "기흥구", code: "41463" },
+      { label: "처인구", code: "41461" },
+  ]},
+  { city: "안양시", districts: [
+      { label: "동안구", code: "41173" }, { label: "만안구", code: "41171" },
+  ]},
+  { city: "화성시", districts: [
+      { label: "병점구", code: "41595" }, { label: "동탄구", code: "41597" },
+      { label: "효행구", code: "41593" }, { label: "만세구", code: "41591" },
+  ]},
+  { city: "광명시", districts: [ { label: "전체", code: "41210" } ] },
+  { city: "하남시", districts: [ { label: "전체", code: "41450" } ] },
+  { city: "과천시", districts: [ { label: "전체", code: "41290" } ] },
+  { city: "의왕시", districts: [ { label: "전체", code: "41430" } ] },
+];
+
+// ── 기본 보유 아파트 (최초 방문 시에만 자동으로 채워짐, 이후엔 사용자가 삭제/추가한 상태가 그대로 저장됨) ──
+const DEFAULT_OWNED_APTS = [
+  { id: "default-1", name: "삼성래미안", region: "안양시 만안구", address: "안양동 90-1", code: "41171", area: 79 },
+  { id: "default-2", name: "비산롯데캐슬", region: "안양시 동안구", address: "비산동 408", code: "41173", area: 82 },
+];
+
+// ── 지인 보유 아파트 프리셋 (버튼으로 토글 추가/제거, 여러 명 동시 활성화 가능) ──
+// ⚠ 이름/코드는 확인/웹 검색으로 채운 것이라 국토부 등록명과 다를 수 있습니다.
+// "단지 검색"에 안 잡히면 보유 아파트 목록에서 삭제 후 직접 검색해 추가하세요.
+const OWNED_PRESET_GROUPS = [
+  { owner: "HS", apts: [
+      { name: "삼성래미안", region: "안양시 만안구", address: "안양동 90-1", code: "41171", area: 79 },
+      { name: "비산롯데캐슬", region: "안양시 동안구", address: "비산동 408", code: "41173", area: 82 },
+  ]},
+  { owner: "DJ", apts: [
+      { name: "영등포푸르지오", region: "서울시 영등포구", address: "영등포동 647", code: "11560", area: 73 },
+      { name: "우미린제일풍경채", region: "화성시 동탄구", address: "석우동 53", code: "41597", areaMin: 74, areaMax: 80 },
+      { name: "동탄역 시범한화 꿈에그린 프레스티지", region: "화성시 동탄구", address: "청계동 520", code: "41597", area: 101 },
+  ]},
+  { owner: "YW", apts: [
+      { name: "신나무실극동", region: "수원시 영통구", address: "영통동 967-2", code: "41117", area: 84 },
+      { name: "대원신동아", region: "수원시 권선구", address: "권선동 1274", code: "41113", area: 59 },
+  ]},
+  { owner: "JW", apts: [
+      { name: "우성", region: "서울시 송파구", address: "가락동 96-1", code: "11710", area: 58 },
+  ]},
+];
+
+// ── 프리셋: 관심 아파트 28개 (사용자 지정, 서울 10 + 경기 18) ──
+// ⚠ 이름/코드는 웹 검색으로 확인했지만 국토부 API의 정확한 등록 단지명과
+// 다를 수 있습니다. "단지 검색"에 안 잡히면 삭제 후 직접 검색해 추가하세요.
+// ⚠ 여러 단지로 나뉜 대단지(마포래미안푸르지오, 신흥역하늘채랜더스원 등)는 그중
+// 대장 단지 하나만 매핑해뒀습니다. 다른 단지를 보고 싶으면 단지 검색 결과에서 직접 바꿔주세요.
+const PRESET_WATCH_APTS = [
+  // ── 서울 10 ──
+  { id: "preset-1", name: "도곡렉슬", region: "서울시 강남구", address: "도곡동", code: "11680", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-2", name: "반포자이", region: "서울시 서초구", address: "반포동", code: "11650", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-3", name: "헬리오시티", region: "서울시 송파구", address: "가락동", code: "11710", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-4", name: "리센츠", region: "서울시 송파구", address: "잠실동", code: "11710", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-5", name: "잠실엘스", region: "서울시 송파구", address: "잠실동", code: "11710", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-6", name: "고덕그라시움", region: "서울시 강동구", address: "고덕동", code: "11740", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-7", name: "올림픽파크포레온", region: "서울시 강동구", address: "둔촌동", code: "11740", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-8", name: "마포래미안푸르지오2단지", region: "서울시 마포구", address: "아현동", code: "11440", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-9", name: "서울숲리버뷰자이", region: "서울시 성동구", address: "성수동1가", code: "11200", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-10", name: "한가람", region: "서울시 용산구", address: "이촌동", code: "11170", area: 84, areaMin: 83, areaMax: 85 },
+  // ── 경기 18 ──
+  { id: "preset-11", name: "파크뷰", region: "성남시 분당구", address: "정자동", code: "41135", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-12", name: "위례센트럴자이", region: "성남시 수정구", address: "창곡동", code: "41131", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-13", name: "산성역포레스티아", region: "성남시 수정구", address: "신흥동", code: "41131", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-14", name: "신흥역하늘채랜더스원1단지", region: "성남시 중원구", address: "중앙동", code: "41133", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-15", name: "광교중흥에스클래스", region: "수원시 영통구", address: "원천동", code: "41117", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-16", name: "자연앤힐스테이트", region: "수원시 영통구", address: "이의동", code: "41117", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-17", name: "매교역푸르지오SKVIEW", region: "수원시 팔달구", address: "매교동", code: "41115", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-18", name: "화서역파크푸르지오", region: "수원시 장안구", address: "정자동", code: "41111", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-19", name: "성복역롯데캐슬골드타운", region: "용인시 수지구", address: "성복동", code: "41465", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-20", name: "평촌더샵센트럴시티", region: "안양시 동안구", address: "관양동", code: "41173", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-21", name: "향촌롯데", region: "안양시 동안구", address: "평촌동", code: "41173", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-22", name: "래미안안양메가트리아", region: "안양시 만안구", address: "안양동", code: "41171", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-23", name: "동탄역롯데캐슬", region: "화성시 동탄구", address: "여울동", code: "41597", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-24", name: "병점역아이파크캐슬", region: "화성시 병점구", address: "병점동", code: "41595", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-25", name: "광명역써밋플레이스", region: "광명시", address: "일직동", code: "41210", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-26", name: "미사강변 골든 센트로", region: "하남시", address: "망월동", code: "41450", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-27", name: "과천푸르지오써밋", region: "과천시", address: "중앙동", code: "41290", area: 84, areaMin: 83, areaMax: 85 },
+  { id: "preset-28", name: "인덕원푸르지오엘센트로", region: "의왕시", address: "포일동", code: "41430", area: 84, areaMin: 83, areaMax: 85 },
+];
+
+// ── 프록시 서버 주소 ──
+// Cloudflare Worker 배포 후 나온 주소를 여기에 붙여넣으세요.
+// 예: "https://apt-api-proxy.내계정이름.workers.dev"
+const PROXY_BASE_URL = "https://apt-api-proxy.sonhy323n.workers.dev";
+
+function safeParseList(json, fallback) {
+  if (json === null) return fallback;
+  try {
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+const storedOwned = localStorage.getItem("apt_owned");
+let ownedApts = storedOwned !== null ? safeParseList(storedOwned, DEFAULT_OWNED_APTS) : DEFAULT_OWNED_APTS;
+let watchApts = safeParseList(localStorage.getItem("apt_watch"), []);
+let sortMode = "amount";
+let lastResults = null;
+let errorRowsExpanded = false;
+let currentRowsById = new Map();
+
+// runCompare 중복 실행 방지용 토큰(버튼은 실행 중 disabled 처리되므로 실제로는 거의 안 쓰이지만,
+// 혹시 모를 경쟁 상태에 대비해 남겨둔다).
+let compareRunToken = 0;
+
+// ── 초기화 ──
+window.addEventListener("DOMContentLoaded", () => {
+  const now = new Date();
+  const nowYm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  document.getElementById("endYm").value = nowYm;
+  document.getElementById("startYm").value = "202503";
+
+  renderSearchBlock("owned");
+  renderSearchBlock("watch");
+  renderAptList("owned");
+  renderAptList("watch");
+});
+
+function addMonths(ym, delta) {
+  let y = parseInt(ym.slice(0, 4), 10);
+  let m = parseInt(ym.slice(4, 6), 10) + delta;
+  while (m <= 0) { m += 12; y -= 1; }
+  while (m > 12) { m -= 12; y += 1; }
+  return `${y}${String(m).padStart(2, "0")}`;
+}
+
+// ── 사용법 안내 접기/펼치기 ──
+function toggleUsageHint() {
+  const hint = document.getElementById("usageHint");
+  const arrow = document.getElementById("usageHintArrow");
+  const nowHidden = hint.style.display === "none";
+  hint.style.display = nowHidden ? "block" : "none";
+  arrow.textContent = nowHidden ? "접기" : "펼치기";
+}
+
+// ── 시작월/종료월 ◀▶(1개월) / ◀◀▶▶(6개월) 이동 버튼 ──
+// 해당 입력창 값을 delta개월 이동시키고 바로 조회를 실행한다. 캐시 덕분에 이미 조회했던
+// 월로 옮기면 API 호출 없이 즉시 반영되고, 처음 보는 월이면 그 부분만 새로 조회된다.
+// 이동 결과가 반대쪽 월을 넘어서게 되면(시작월이 종료월보다 미래가 되거나, 종료월이
+// 시작월보다 과거가 되면) 이동 자체를 막고 에러 메시지를 보여준다.
+function stepMonth(fieldId, delta) {
+  const input = document.getElementById(fieldId);
+  const cur = input.value.trim();
+  if (cur.length !== 6 || isNaN(Date.parse(`${cur.slice(0, 4)}-${cur.slice(4, 6)}-01`))) {
+    // 현재 값 자체가 올바른 YYYYMM이 아니면 몇 월로 이동할지 알 수 없으므로, 이동 없이
+    // 입력창만 강조해 문제를 바로 알려준다.
+    input.classList.add("period-input-invalid");
+    return;
+  }
+  const next = addMonths(cur, delta);
+  const otherFieldId = fieldId === "startYm" ? "endYm" : "startYm";
+  const otherInput = document.getElementById(otherFieldId);
+  const otherVal = otherInput.value.trim();
+  const otherLooksValid = otherVal.length === 6 && !isNaN(Date.parse(`${otherVal.slice(0, 4)}-${otherVal.slice(4, 6)}-01`));
+  if (otherLooksValid) {
+    const crosses = fieldId === "startYm" ? next > otherVal : next < otherVal;
+    if (crosses) {
+      const errEl = document.getElementById("compareError");
+      errEl.innerHTML = `<div class="error-box">${fieldId === "startYm" ? "시작월" : "종료월"}이 ${fieldId === "startYm" ? "종료월보다 미래" : "시작월보다 과거"}가 되어 이동을 멈췄습니다.</div>`;
+      return;
+    }
+  }
+  input.classList.remove("period-input-invalid");
+  input.value = next;
+  runCompare(false);
+}
+
+// 입력창에 타이핑하는 동안 실시간으로 형식(6자리 숫자 + 01~12월)을 확인해 잘못됐을 때만
+// 테두리를 빨갛게 표시한다. 조회는 여전히 버튼(또는 ◀▶)을 눌러야 실행된다.
+function onPeriodInputTyped(fieldId) {
+  const input = document.getElementById(fieldId);
+  input.value = input.value.replace(/[^0-9]/g, "").slice(0, 6);
+  const v = input.value;
+  const month = parseInt(v.slice(4, 6), 10);
+  const looksInvalid = v.length === 6 && (month < 1 || month > 12);
+  input.classList.toggle("period-input-invalid", looksInvalid);
+}
+function fmtEok(manwon) {
+  const n = Number(manwon);
+  if (!isFinite(n)) return "-";
+  const eok = n / 10000;
+  return eok >= 1 || eok <= -1 ? `${eok.toFixed(2)}억` : `${Math.round(n).toLocaleString()}만`;
+}
+function ymLabel(ym) { return ym ? `${ym.slice(0,4)}.${ym.slice(4,6)}` : ""; }
+// 목표월과 실제 조회월이 다르면(=데이터 대체) 경고 아이콘과 함께 실제 월/건수를 노출
+function monthNote(foundYm, targetYm, count) {
+  if (!foundYm || foundYm === targetYm) return "";
+  return `<div class="small" style="color:#E0A458;">🔄 ${ymLabel(foundYm)} 대체 (${count}건)</div>`;
+}
+function areaLabelOf(o) {
+  if (o.areaMin !== undefined && o.areaMax !== undefined && o.areaMin !== o.areaMax) {
+    return `전용 ${o.areaMin}~${o.areaMax}㎡`;
+  }
+  return `전용 ${o.area}㎡`;
+}
+
+// ── 월평균 거래가 왜곡 방지 규칙 ──
+// 국토부 실거래가 자료에는 "증여" 같은 거래 관계 정보가 없어 완벽히 걸러낼 수는 없지만,
+// 실제 존재하는 필드/통계로 대표적인 왜곡 요인을 걸러낸다.
+const LOW_FLOOR_MAX = 3;          // 3층 이하는 저층으로 간주
+const OUTLIER_RATIO = 0.7;                // 중개거래: 기준 중위값의 70% 미만이면 이상치로 간주
+const DIRECT_DEAL_OUTLIER_RATIO = 0.9;    // 직거래: 가족간 저가양도 등에 취약하므로 90% 미만이면 이상치로 간주
+const SMALL_SAMPLE_THRESHOLD = 2; // 당월 표본이 이 건수 이하이면 과거월까지 참조해 기준값을 보강
+const CURRENT_MONTH_WEIGHT = 1;
+const MAX_PAST_MONTHS_LOOKBACK = 6; // 당월 표본이 적을 때, 비교 기준(참고 거래 2건 이상)을 만들 때까지 최대 이만큼 과거로 확장
+function pastMonthWeight(back) { return 0.5 ** back; } // 1개월 전 0.5, 2개월 전 0.25, 3개월 전 0.125 ... (미래월은 참조하지 않음)
+// 국토부 실거래가 상세자료의 거래유형(dealingGbn) 필드로 "직거래" 여부를 판단.
+// 필드가 없는 응답이면 직거래가 아닌 것으로 간주해 기존 기준(70%)을 그대로 적용한다.
+function isDirectDeal(it) {
+  return String(it.dealingGbn || "").trim() === "직거래";
+}
+
+function dealAmountOf(it) {
+  return parseInt(String(it.dealAmount).replace(/,/g, "").trim(), 10);
+}
+function median(nums) {
+  const s = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 !== 0 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+// 가중 중위값: pairs = [{amount, weight}, ...]. 금액순 정렬 후 누적 가중치가 전체의 절반을
+// 넘는 지점의 금액을 기준값으로 삼는다.
+function weightedMedian(pairs) {
+  if (pairs.length === 0) return null;
+  const sorted = [...pairs].sort((a, b) => a.amount - b.amount);
+  const totalWeight = sorted.reduce((s, p) => s + p.weight, 0);
+  let cum = 0;
+  for (const p of sorted) {
+    cum += p.weight;
+    if (cum >= totalWeight / 2) return p.amount;
+  }
+  return sorted[sorted.length - 1].amount;
+}
+
+// ① 해제(취소)된 계약 제외. 결과가 0건이면(전부 해제) 원본을 그대로 사용.
+function cleanStep1(rawMatches) {
+  const notCancelled = rawMatches.filter(it => !(it.cdealType && String(it.cdealType).trim()));
+  return notCancelled.length > 0 ? notCancelled : rawMatches;
+}
+// ② 저층(3층 이하) 제외 — 단, 그 달 일반층(4층 이상) 평균 이상인 저층 거래는 재포함.
+// 일반층 거래가 아예 없으면(비교 기준 없음) 이 규칙을 적용하지 않는다.
+function cleanStep2(step1) {
+  const withFloor = step1.map(it => ({
+    it,
+    floor: parseInt(String(it.floor || "").trim(), 10),
+    amount: dealAmountOf(it),
+  }));
+  const general = withFloor.filter(w => !Number.isFinite(w.floor) || w.floor > LOW_FLOOR_MAX);
+  const low = withFloor.filter(w => Number.isFinite(w.floor) && w.floor <= LOW_FLOOR_MAX);
+  if (general.length === 0) return step1;
+  const generalAvg = general.reduce((s, w) => s + w.amount, 0) / general.length;
+  const reincludedLow = low.filter(w => w.amount >= generalAvg);
+  return [...general, ...reincludedLow].map(w => w.it);
+}
+
+// 특정 단지+평형의 한 달치 매칭 거래(rawMatches)에 왜곡 방지 규칙을 순서대로 적용해
+// 평균 계산에 실제로 쓸 거래 목록을 돌려준다.
+// ① 해제(취소)된 계약 제외
+// ② 저층(3층 이하) 제외 — 단, 그 달 일반층(4층 이상) 평균 이상인 저층 거래는 재포함
+// ③ 이상치 제외: 기준 중위값 대비 지나치게 낮은 거래를 제외. 중개거래는 70% 미만, 직거래는
+//    90% 미만이면 이상치로 간주(직거래는 가족간 저가양도 등에 더 취약하므로 더 엄격하게 봄).
+//    - 당월 표본이 SMALL_SAMPLE_THRESHOLD(2)건 이하이고 과거월 데이터(pastMonthsRaw)가 주어졌다면,
+//      당월(가중치 1) + 과거 각 달(1개월 전 0.5, 2개월 전 0.25 ... pastMonthWeight 참고) 거래를
+//      모두 모아 "가중 중위값"을 기준으로 삼는다.
+//      (표본이 적은 달은 그 달 자체 중위값만으로는 정상/비정상을 가르기 불안정하기 때문)
+//    - 당월 표본이 충분(3건 이상)하면 기존과 동일하게 당월 자체 중위값만 사용한다.
+// ①②단계는 결과가 0건이 되면(비교 기준 자체가 없거나 전부 걸러지면) 그 단계를 건너뛰고 이전
+// 단계 결과를 그대로 사용한다. 반면 ③단계(이상치 제외)는 그 반대로, 필터링 후 0건이 되면(=그 달
+// 유일한 거래가 이상치로 판정된 경우 등) 원본으로 되돌리지 않고 그대로 0건을 반환해 대체월 탐색
+// 로직(resolvePriceQueries)이 다음 후보 달을 찾도록 넘긴다.
+//
+// pastMonthsRaw: [{ items: rawMatches, weight }, ...] 순서 무관, 최대 MAX_PAST_MONTHS_LOOKBACK개월치.
+//                items는 아직 정제 전(①②) 원본 매칭 거래이며 이 함수 내부에서 동일하게 정제한다.
+function cleanMatches(rawMatches, pastMonthsRaw = []) {
+  if (rawMatches.length === 0) return rawMatches;
+
+  const step1 = cleanStep1(rawMatches);
+  const step2 = cleanStep2(step1);
+  if (step2.length === 0) return step2;
+
+  let ref;
+  if (step2.length <= SMALL_SAMPLE_THRESHOLD && pastMonthsRaw.length > 0) {
+    const referencePairs = step2.map(it => ({ amount: dealAmountOf(it), weight: CURRENT_MONTH_WEIGHT }));
+    pastMonthsRaw.forEach(pm => {
+      if (!pm.weight || !pm.items || pm.items.length === 0) return;
+      const cleaned = cleanStep2(cleanStep1(pm.items));
+      cleaned.forEach(it => referencePairs.push({ amount: dealAmountOf(it), weight: pm.weight }));
+    });
+    if (referencePairs.length < 2) return step2; // 비교할 대상 자체가 부족하면 필터 생략
+    ref = weightedMedian(referencePairs);
+  } else if (step2.length >= 2) {
+    ref = median(step2.map(dealAmountOf));
+  } else {
+    return step2; // 거래 1건뿐이고 참고할 과거 데이터도 없음 — 필터 생략
+  }
+
+  return step2.filter(it => dealAmountOf(it) >= ref * (isDirectDeal(it) ? DIRECT_DEAL_OUTLIER_RATIO : OUTLIER_RATIO));
+}
+
+// ── 국토부 API 호출 ──
+const KNOWN_ERRORS = {
+  SERVICE_KEY_IS_NOT_REGISTERED_ERROR: "이 API에 등록되지 않은 인증키입니다 (다른 API용 키를 넣었거나, 아직 이 API 활용신청/승인이 안 됐을 수 있음)",
+  APPLICATION_ERROR: "신청은 됐지만 아직 활성화되지 않았을 수 있습니다 (승인 후 시간이 더 필요할 수 있음)",
+  LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR: "일일 요청 한도를 초과했습니다",
+  INVALID_REQUEST_PARAMETER_ERROR: "요청 파라미터가 올바르지 않습니다",
+  NODATA_ERROR: "해당 조건에 데이터가 없습니다",
+  UNREGISTERED_IP: "등록되지 않은 IP입니다 (마이페이지에서 IP 제한 설정 확인)",
+  DEADLINE_HAS_EXPIRED: "API 활용기간이 만료되었습니다",
+  NO_OPENAPI_SERVICE_ERROR: "서비스를 찾을 수 없습니다 (엔드포인트 확인 필요)",
+};
+
+function parseXmlResponse(text) {
+  const doc = new DOMParser().parseFromString(text, "text/xml");
+  if (doc.querySelector("parsererror")) throw new Error("응답을 해석할 수 없습니다 (XML 형식 오류)");
+
+  // 인증 실패 형태: <OpenAPI_ServiceResponse><cmmMsgHeader>...
+  const cmmHeader = doc.querySelector("cmmMsgHeader");
+  if (cmmHeader) {
+    const authMsg = cmmHeader.querySelector("returnAuthMsg")?.textContent?.trim();
+    const errMsg = cmmHeader.querySelector("errMsg")?.textContent?.trim();
+    const label = authMsg || errMsg || "인증 오류";
+    throw new Error(KNOWN_ERRORS[label] || label);
+  }
+
+  // item이 있으면 정상 데이터로 우선 처리 (resultCode 형식 차이에 흔들리지 않도록)
+  const itemNodes = Array.from(doc.querySelectorAll("item"));
+  if (itemNodes.length > 0) {
+    return itemNodes.map((node) => {
+      const obj = {};
+      Array.from(node.children).forEach((child) => {
+        obj[child.tagName] = (child.textContent || "").trim();
+      });
+      return obj;
+    });
+  }
+
+  // item이 없으면 header 정보로 진짜 오류인지, 그냥 해당 월 거래가 없는 것인지 판단
+  const resultCode = doc.querySelector("resultCode")?.textContent?.trim();
+  const resultMsg = doc.querySelector("resultMsg")?.textContent?.trim();
+  if (resultCode && resultCode !== "00") {
+    const label = KNOWN_ERRORS[resultMsg] || resultMsg || "알 수 없는 오류";
+    throw new Error(`[코드 ${resultCode}] ${label}`);
+  }
+  return []; // 정상이지만 해당 월 거래 데이터가 없는 경우
+}
+
+// ── 동시 요청 수 제한 ──
+// 국토부 API의 "초당 서비스 요청제한 횟수 초과" 에러를 피하기 위해, 실제 fetch가 나가는 지점(fetchMonth)에서
+// 동시에 진행 중인 요청 수를 MAX_CONCURRENT_REQUESTS개로 제한한다. 재시도는 하지 않으며(요청 자체가 줄어드는 게
+// 목적), 한도를 넘는 요청은 앞선 요청이 끝날 때까지 대기열에서 기다렸다가 순서대로 실행된다.
+const MAX_CONCURRENT_REQUESTS = 4;
+let activeRequestCount = 0;
+const requestQueue = [];
+function acquireRequestSlot() {
+  if (activeRequestCount < MAX_CONCURRENT_REQUESTS) {
+    activeRequestCount++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => requestQueue.push(resolve));
+}
+function releaseRequestSlot() {
+  const next = requestQueue.shift();
+  if (next) {
+    next(); // activeRequestCount는 그대로 유지한 채 대기 중이던 다음 요청에 슬롯을 넘긴다
+  } else {
+    activeRequestCount--;
+  }
+}
+
+async function fetchMonth(regionCode, ym) {
+  await acquireRequestSlot();
+  let res, text;
+  try {
+    const url = `${PROXY_BASE_URL}/?regionCode=${regionCode}&ym=${ym}`;
+    try {
+      res = await fetch(url);
+    } catch (netErr) {
+      // fetch 자체가 실패(네트워크 차단, CORS, DNS 등) — 프록시에 아예 도달하지 못한 경우
+      throw new Error(`[${regionCode}/${ym}] 프록시 서버에 연결하지 못했습니다: ${netErr.message}`);
+    }
+    text = await res.text();
+  } finally {
+    releaseRequestSlot();
+  }
+  const snippet = text.trim().slice(0, 300);
+  // 프록시가 자체 오류를 JSON으로 돌려주는 경우 (예: 서버에 키 미설정, 파라미터 누락)
+  if (text.trim().startsWith("{")) {
+    try {
+      const j = JSON.parse(text);
+      if (j.error) throw new Error(`[${regionCode}/${ym}] ${j.error}`);
+    } catch (e) {
+      if (e.message && e.message !== text) throw e;
+    }
+  }
+  if (!res.ok && !text.trim().startsWith("<")) {
+    throw new Error(`[${regionCode}/${ym}] 프록시 서버 오류 HTTP ${res.status}${snippet ? ` — 응답: ${snippet}` : ""}`);
+  }
+  try {
+    return parseXmlResponse(text);
+  } catch (e) {
+    throw new Error(`[${regionCode}/${ym}] ${e.message}${snippet ? ` — 응답: ${snippet}` : ""}`);
+  }
+}
+
+// ── (지역코드, 연월) 단위로 API 응답을 캐싱해 동일 조합 중복 호출을 없앤다.
+// 여러 아파트가 같은 지역/같은 달 데이터를 필요로 할 때 실제 fetch는 1번만 나간다.
+// 실패한 요청은 캐시에 남기지 않아, 다음 라운드/다음 비교에서 재시도가 가능하게 한다.
+const monthDataCache = new Map(); // `${regionCode}_${ym}` -> Promise<items[]>
+function fetchMonthCached(regionCode, ym) {
+  const key = `${regionCode}_${ym}`;
+  if (!monthDataCache.has(key)) {
+    const p = fetchMonth(regionCode, ym).catch((e) => { monthDataCache.delete(key); throw e; });
+    monthDataCache.set(key, p);
+  }
+  return monthDataCache.get(key);
+}
+
+// 특정 지역의 몇 개월치 데이터를 모아 단지명/평형 목록을 만든다 (드롭다운 채우기용)
+// 여러 달치를 순차가 아닌 병렬로 조회해 대기 시간을 줄인다.
+async function fetchCatalogMonths(regionCode, monthsToFetch, statusEl, labelPrefix) {
+  if (statusEl) statusEl.textContent = `${labelPrefix}(${monthsToFetch.map(ymLabel).join(", ")}) 거래 데이터 조회 중...`;
+  const monthResults = await Promise.all(monthsToFetch.map((monthYm) => fetchMonthCached(regionCode, monthYm)));
+  const merged = monthResults.flat();
+  // 단지명별 존재하는 평형(㎡)별 거래건수 + 대표 주소 집계
+  const map = {}; // { 아파트명: { 평형: 거래건수 } }
+  const addressMap = {};
+  merged.forEach((it) => {
+    const nm = (it.aptNm || "").trim();
+    const area = parseFloat(it.excluUseAr);
+    if (!nm || !area) return;
+    const areaKey = Math.round(area * 10) / 10;
+    if (!map[nm]) map[nm] = {};
+    map[nm][areaKey] = (map[nm][areaKey] || 0) + 1;
+    if (!addressMap[nm]) {
+      const umd = (it.umdNm || "").trim();
+      const jibun = (it.jibun || "").trim();
+      addressMap[nm] = [umd, jibun].filter(Boolean).join(" ");
+    }
+  });
+  return { map, addressMap };
+}
+
+// 최근 1년(12개월)치를 항상 조회해 단지 목록/평형 정보를 만든다. 예전엔 "지역 전체에 최근
+// 3개월간 거래가 하나도 없을 때만" 6개월로 넓혔는데, 그러면 그 지역의 다른 단지가 최근에 거래됐다는
+// 이유만으로 정작 찾는 단지 자체는 발견되지 않는 문제가 있었다(개별 단지 단위가 아니라 지역
+// 전체 단위로 판단했기 때문). 그래서 지금은 지역 상태와 무관하게 항상 최근 1년을 다 모아
+// "1년 내 거래가 있던 단지라면 평형이 노출된다"를 보장한다. 동시 요청은 MAX_CONCURRENT_REQUESTS
+// (4개)로 제한되고, 같은 지역/같은 달 조회는 fetchMonthCached로 캐시되므로 반복 검색 비용은 낮다.
+async function loadApartmentCatalog(regionCode, statusEl) {
+  const now = new Date();
+  let ym = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  ym = addMonths(ym, -1);
+  const months = Array.from({ length: 12 }, (_, i) => addMonths(ym, -i));
+  try {
+    return await fetchCatalogMonths(regionCode, months, statusEl, "최근 1년");
+  } catch (e) {
+    if (statusEl) statusEl.textContent = "조회 실패: " + e.message;
+    throw e;
+  }
+}
+
+// ── 검색/선택 블록 렌더 ──
+function renderSearchBlock(kind) {
+  const el = document.getElementById(kind === "owned" ? "ownedSearchBlock" : "watchSearchBlock");
+  el.innerHTML = `
+    <div class="apt-search-block">
+      <div class="row">
+        <select id="${kind}_city">
+          ${REGION_GROUPS.map(g => `<option value="${g.city}">${g.city}</option>`).join("")}
+        </select>
+        <select id="${kind}_district"></select>
+        <button class="btn-secondary" onclick="searchCatalog('${kind}')">단지 검색</button>
+        <span id="${kind}_status" class="small"></span>
+      </div>
+      <div class="row" id="${kind}_pickRow" style="display:none;">
+        <select id="${kind}_aptSelect" onchange="onAptSelectChange('${kind}')"></select>
+        <span class="small">전용면적</span>
+        <select id="${kind}_areaSelect"></select>
+        <button class="btn-primary" onclick="confirmAdd('${kind}')">추가</button>
+      </div>
+      <div id="${kind}_addressDisplay" class="small" style="display:none;"></div>
+    </div>
+  `;
+  document.getElementById(`${kind}_city`).addEventListener("change", () => { populateDistrict(kind); resetPickState(kind); });
+  document.getElementById(`${kind}_district`).addEventListener("change", () => resetPickState(kind));
+  populateDistrict(kind);
+}
+
+// 시/구를 바꾸면 이전에 불러온 단지 목록은 더 이상 선택 중인 지역과 맞지 않으므로 숨기고
+// 다시 "단지 검색"을 누르도록 안내한다. (이전엔 목록이 그대로 남아있어 사용자가
+// 지역을 바꿨다고 착각한 채 옛 지역의 단지를 추가할 수 있었음)
+function resetPickState(kind) {
+  delete catalogCache[kind];
+  const pickRow = document.getElementById(`${kind}_pickRow`);
+  if (pickRow) pickRow.style.display = "none";
+  const addrEl = document.getElementById(`${kind}_addressDisplay`);
+  if (addrEl) addrEl.style.display = "none";
+  const statusEl = document.getElementById(`${kind}_status`);
+  if (statusEl) statusEl.textContent = "지역이 바뀌었습니다. 단지를 다시 검색해주세요.";
+}
+
+function populateDistrict(kind) {
+  const citySel = document.getElementById(`${kind}_city`);
+  const group = REGION_GROUPS.find(g => g.city === citySel.value);
+  const districtSel = document.getElementById(`${kind}_district`);
+  if (!group) { districtSel.innerHTML = ""; return; }
+  districtSel.innerHTML = group.districts.map(d => `<option value="${d.code}">${d.label}</option>`).join("");
+}
+
+function currentRegionLabel(kind) {
+  const citySel = document.getElementById(`${kind}_city`);
+  const districtSel = document.getElementById(`${kind}_district`);
+  const city = citySel.value;
+  const districtLabel = districtSel.options[districtSel.selectedIndex] ? districtSel.options[districtSel.selectedIndex].text : "";
+  return districtLabel === "전체" || !districtLabel ? city : `${city} ${districtLabel}`;
+}
+
+const catalogCache = {}; // kind -> { 아파트명: Set }
+
+async function searchCatalog(kind) {
+  const districtSel = document.getElementById(`${kind}_district`);
+  const regionCode = districtSel.value;
+  const statusEl = document.getElementById(`${kind}_status`);
+  if (!regionCode) { statusEl.textContent = "지역을 선택해주세요."; return; }
+  statusEl.textContent = "불러오는 중...";
+  try {
+    const { map, addressMap } = await loadApartmentCatalog(regionCode, statusEl);
+    catalogCache[kind] = { map, addressMap, regionCode, regionLabel: currentRegionLabel(kind) };
+    const names = Object.keys(map).sort();
+    if (names.length === 0) {
+      statusEl.textContent = "최근 1년 내 거래 데이터가 없습니다. (지역코드/프록시 문제일 수 있어요)";
+      return;
+    }
+    const aptSelect = document.getElementById(`${kind}_aptSelect`);
+    aptSelect.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join("");
+    onAptSelectChange(kind);
+    document.getElementById(`${kind}_pickRow`).style.display = "flex";
+    statusEl.textContent = `${names.length}개 단지 찾음`;
+  } catch (e) {
+    statusEl.textContent = "조회 실패: " + e.message;
+  }
+}
+
+// 같은 단지 내에서 거의 붙어있는 전용면적(동/라인별 소수점 차이)을 하나의 평형으로 묶는다.
+// 기준: 정렬된 면적 목록에서 이웃한 값끼리 차이가 AREA_GROUP_GAP(㎡) 이하이면 같은 그룹 후보로 본다.
+// 다만 이웃끼리만 비교하면(체이닝) 83→85→87→89처럼 조금씩 이어붙어 그룹 전체 폭이 한없이
+// 넓어질 수 있어, 그룹의 최솟값 대비 AREA_GROUP_ABSOLUTE_CAP(㎡)를 넘으면 강제로 그룹을 끊는다.
+const AREA_GROUP_GAP = 2;
+const AREA_GROUP_ABSOLUTE_CAP = 5;
+function clusterAreas(areaCounts) {
+  const areas = Object.keys(areaCounts).map(Number).sort((a, b) => a - b);
+  const groups = [];
+  let current = null;
+  for (const a of areas) {
+    const withinGap = current && (a - current.max) <= AREA_GROUP_GAP;
+    const withinAbsoluteCap = current && (a - current.min) <= AREA_GROUP_ABSOLUTE_CAP;
+    if (withinGap && withinAbsoluteCap) {
+      current.areas.push(a);
+      current.max = a;
+      current.count += areaCounts[a];
+    } else {
+      current = { areas: [a], min: a, max: a, count: areaCounts[a] };
+      groups.push(current);
+    }
+  }
+  groups.forEach(g => {
+    let bestArea = g.areas[0], bestCount = areaCounts[g.areas[0]];
+    for (const a of g.areas) {
+      if (areaCounts[a] > bestCount) { bestArea = a; bestCount = areaCounts[a]; }
+    }
+    g.representative = bestArea;
+  });
+  // 거래건수 많은 순 정렬
+  groups.sort((x, y) => y.count - x.count);
+  return groups;
+}
+
+const currentAreaGroups = {}; // kind -> groups[]
+
+function onAptSelectChange(kind) {
+  const cache = catalogCache[kind];
+  if (!cache) return;
+  const aptSelect = document.getElementById(`${kind}_aptSelect`);
+  const areaSelect = document.getElementById(`${kind}_areaSelect`);
+  const areaCounts = cache.map[aptSelect.value] || {};
+  const groups = clusterAreas(areaCounts);
+  currentAreaGroups[kind] = groups;
+  const maxCount = Math.max(...groups.map(g => g.count), 0);
+  areaSelect.innerHTML = groups.map((g, idx) => {
+    const tag = g.count === maxCount ? " ⭐주력" : "";
+    const rangeLabel = g.min === g.max ? `${g.min}㎡` : `${g.min}~${g.max}㎡ (${g.representative}㎡대로 통합)`;
+    return `<option value="${idx}">전용 ${rangeLabel} (최근 1년 ${g.count}건)${tag}</option>`;
+  }).join("");
+
+  const addrEl = document.getElementById(`${kind}_addressDisplay`);
+  const address = cache.addressMap[aptSelect.value];
+  if (address) {
+    addrEl.style.display = "block";
+    addrEl.textContent = `📍 ${cache.regionLabel} ${address} — 원하는 단지가 맞는지 확인해주세요. (⭐주력 = 최근 1년간 거래건수가 가장 많은 평형, 면적이 ${AREA_GROUP_GAP}㎡ 이내로 붙어있는 동/라인은 하나의 평형으로 자동 통합되며, 그룹 폭은 최대 ${AREA_GROUP_ABSOLUTE_CAP}㎡까지만 허용됩니다)`;
+  } else {
+    addrEl.style.display = "none";
+  }
+}
+
+function confirmAdd(kind) {
+  const cache = catalogCache[kind];
+  if (!cache) return;
+  const aptSelect = document.getElementById(`${kind}_aptSelect`);
+  const areaSelect = document.getElementById(`${kind}_areaSelect`);
+  const groups = currentAreaGroups[kind];
+  if (!aptSelect.value || !areaSelect.value || !groups) return;
+  const group = groups[parseInt(areaSelect.value, 10)];
+  if (!group) return;
+  const apt = {
+    id: Date.now() + Math.random(),
+    name: aptSelect.value,
+    region: cache.regionLabel,
+    address: cache.addressMap[aptSelect.value] || "",
+    code: cache.regionCode,
+    area: group.representative,
+    areaMin: group.min,
+    areaMax: group.max,
+  };
+  if (kind === "owned") { ownedApts.push(apt); localStorage.setItem("apt_owned", JSON.stringify(ownedApts)); }
+  else { watchApts.push(apt); localStorage.setItem("apt_watch", JSON.stringify(watchApts)); }
+  renderAptList(kind);
+}
+
+function renderAptList(kind) {
+  const list = kind === "owned" ? ownedApts : watchApts;
+  const el = document.getElementById(kind === "owned" ? "ownedList" : "watchList");
+  if (kind === "owned") renderOwnedGroupButtons();
+  if (list.length === 0) {
+    el.innerHTML = `<div class="small">등록된 아파트가 없습니다. 아래에서 지역을 골라 단지를 검색해 추가하세요.</div>`;
+    return;
+  }
+  const badgeClass = kind === "owned" ? "badge-owned" : "badge-watch";
+  const badgeText = kind === "owned" ? "보유" : "관심";
+  el.innerHTML = list.map(a => {
+    const areaLabel = (a.areaMin !== undefined && a.areaMax !== undefined && a.areaMin !== a.areaMax)
+      ? `전용 ${a.areaMin}~${a.areaMax}㎡`
+      : `전용 ${a.area}㎡`;
+    const ownerTag = a.owner ? `<span class="badge" style="background:#DDE3F0; color:#3A4A66;">${a.owner}</span>` : "";
+    return `
+    <div class="apt-chip">
+      <span class="badge ${badgeClass}">${badgeText}</span>
+      ${ownerTag}
+      <span>${a.name} · ${a.region}${a.address ? " " + a.address : ""} · ${areaLabel}</span>
+      <button class="remove-x" onclick="removeApt('${kind}', '${a.id}')">✕</button>
+    </div>
+  `;
+  }).join("");
+}
+
+// 지인 보유 아파트 프리셋 버튼 렌더 — 이니셜을 누르면 그 사람의 아파트(들)가 보유 목록에 토글
+// 추가/제거된다. 여러 명을 동시에 켜둘 수 있고, 현재 목록에 그 사람 아파트가 하나라도 있으면
+// 활성 상태(강조)로 표시한다.
+function renderOwnedGroupButtons() {
+  const el = document.getElementById("ownedGroupButtons");
+  if (!el) return;
+  el.innerHTML = OWNED_PRESET_GROUPS.map(g => {
+    const active = ownedApts.some(a => a.owner === g.owner);
+    const cls = active ? "btn-primary" : "btn-secondary";
+    return `<button class="${cls}" onclick="toggleOwnedGroup('${g.owner}')">${g.owner}${active ? " ✓" : ""}</button>`;
+  }).join("") + `<span class="small">누르면 그 사람의 보유 아파트가 추가/제거됩니다 (여러 명 동시 선택 가능)</span>`;
+}
+
+function toggleOwnedGroup(owner) {
+  const group = OWNED_PRESET_GROUPS.find(g => g.owner === owner);
+  if (!group) return;
+  const isActive = ownedApts.some(a => a.owner === owner);
+  if (isActive) {
+    ownedApts = ownedApts.filter(a => a.owner !== owner);
+  } else {
+    const additions = group.apts.map(a => ({ ...a, owner, id: `${owner}-${a.name}-${Date.now()}-${Math.random()}` }));
+    ownedApts = [...ownedApts, ...additions];
+  }
+  localStorage.setItem("apt_owned", JSON.stringify(ownedApts));
+  renderAptList("owned");
+}
+
+function resetToDefaultOwned() {
+  if (!confirm("보유 아파트 목록을 지우고 기본값(비산롯데캐슬 전용82 + 삼성래미안 전용79)으로 교체할까요?")) return;
+  ownedApts = DEFAULT_OWNED_APTS.map(a => ({ ...a, id: `${a.id}-${Date.now()}` }));
+  localStorage.setItem("apt_owned", JSON.stringify(ownedApts));
+  renderAptList("owned");
+}
+
+function clearAllOwnedApts() {
+  if (ownedApts.length === 0) return;
+  if (!confirm(`현재 보유 아파트 ${ownedApts.length}개를 모두 삭제할까요? 되돌릴 수 없습니다.`)) return;
+  ownedApts = [];
+  localStorage.setItem("apt_owned", JSON.stringify(ownedApts));
+  renderAptList("owned");
+}
+
+function loadPresetWatchApts() {
+  if (!confirm("현재 관심 아파트 목록을 지우고, 지정된 28개 단지로 교체할까요?")) return;
+  // id는 매번 새로 부여해 기존에 같은 프리셋을 불러온 적이 있어도 충돌 없이 교체되도록 함
+  watchApts = PRESET_WATCH_APTS.map(a => ({ ...a, id: `${a.id}-${Date.now()}` }));
+  localStorage.setItem("apt_watch", JSON.stringify(watchApts));
+  renderAptList("watch");
+}
+
+function clearAllWatchApts() {
+  if (watchApts.length === 0) return;
+  if (!confirm(`현재 관심 아파트 ${watchApts.length}개를 모두 삭제할까요? 되돌릴 수 없습니다.`)) return;
+  watchApts = [];
+  localStorage.setItem("apt_watch", JSON.stringify(watchApts));
+  renderAptList("watch");
+}
+
+// ── 프리셋 "선택 추가" (전체 교체와 달리 기존 목록은 유지한 채, 누른 항목만 즉시 추가/제거) ──
+function togglePresetPicker() {
+  const el = document.getElementById("presetPicker");
+  const willShow = el.style.display === "none" || el.style.display === "";
+  el.style.display = willShow ? "block" : "none";
+  if (willShow) renderPresetPickerList();
+}
+function renderPresetPickerList() {
+  const listEl = document.getElementById("presetPickerList");
+  const existingNames = new Set(watchApts.map(a => a.name));
+  listEl.innerHTML = PRESET_WATCH_APTS.map(a => {
+    const active = existingNames.has(a.name);
+    const cls = active ? "toggle-btn active" : "toggle-btn";
+    return `<button class="${cls}" onclick="toggleWatchPreset('${a.id}')">${active ? "✓ " : ""}${a.name} <span class="small">(${a.region})</span></button>`;
+  }).join("");
+}
+// 프리셋 하나를 클릭하는 즉시 관심 목록에 추가하거나(없으면) 제거한다(있으면). 스크롤해서
+// 별도의 "추가" 버튼을 누를 필요 없이, 클릭 한 번으로 바로 반영되고 버튼 자체의 표시도 갱신된다.
+function toggleWatchPreset(presetId) {
+  const preset = PRESET_WATCH_APTS.find(a => a.id === presetId);
+  if (!preset) return;
+  const isActive = watchApts.some(a => a.name === preset.name);
+  if (isActive) {
+    watchApts = watchApts.filter(a => a.name !== preset.name);
+  } else {
+    watchApts = [...watchApts, { ...preset, id: `${preset.id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}` }];
+  }
+  localStorage.setItem("apt_watch", JSON.stringify(watchApts));
+  renderAptList("watch");
+  renderPresetPickerList(); // 방금 누른 버튼의 활성 상태를 즉시 반영
+}
+
+// ── 결과 영역: 항목 클릭 → 상세 플로팅 창 ──
+function openAptDetailModal(rowId) {
+  const r = currentRowsById.get(String(rowId));
+  if (!r) return;
+  document.getElementById("aptDetailContent").innerHTML = buildAptDetailHtml(r);
+  document.getElementById("aptDetailOverlay").classList.add("visible");
+}
+function closeAptDetailModal() {
+  document.getElementById("aptDetailOverlay").classList.remove("visible");
+}
+function closeAptDetailModalOnOverlay(e) {
+  if (e.target.id === "aptDetailOverlay") closeAptDetailModal();
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAptDetailModal(); });
+
+function buildAptDetailHtml(r) {
+  const { startYm, endYm } = lastResults;
+  const cls = r.amount >= 0 ? "up" : "down";
+  const sign = r.amount >= 0 ? "+" : "";
+
+  if (r.kind === "보유합산") {
+    const rows = (r.breakdown || []).map(d => {
+      const dCls = d.amount >= 0 ? "up" : "down";
+      const dSign = d.amount >= 0 ? "+" : "";
+      return `
+        <div style="padding:8px 0; border-bottom:1px solid #F0E8D6;">
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
+            <span>${d.name} <span class="small" style="font-weight:400;">(전용 ${d.area}㎡)</span></span>
+            <span class="${dCls}">${dSign}${fmtEok(d.amount)} (${dSign}${d.rate.toFixed(1)}%)</span>
+          </div>
+          <div class="small" style="margin-top:2px;">
+            ${ymLabel(startYm)} ${fmtEok(d.startAvg)} → ${ymLabel(endYm)} ${fmtEok(d.endAvg)}
+            · 자산비중 ${d.assetShare.toFixed(1)}% · 상승기여 ${d.contribShare.toFixed(1)}%
+          </div>
+        </div>
+      `;
+    }).join("");
+    return `
+      <div class="apt-detail-title">${r.name}</div>
+      <div class="apt-detail-sub">${r.area} · ${ymLabel(startYm)} → ${ymLabel(endYm)}</div>
+      <div class="apt-detail-grid">
+        <div><div class="apt-detail-item-label">${ymLabel(startYm)} 합산</div><div class="apt-detail-item-value">${fmtEok(r.startAvg)}</div></div>
+        <div><div class="apt-detail-item-label">${ymLabel(endYm)} 합산</div><div class="apt-detail-item-value">${fmtEok(r.endAvg)}</div></div>
+        <div><div class="apt-detail-item-label">상승금액</div><div class="apt-detail-item-value ${cls}">${sign}${fmtEok(r.amount)}</div></div>
+        <div><div class="apt-detail-item-label">상승률</div><div class="apt-detail-item-value ${cls}">${sign}${r.rate.toFixed(1)}%</div></div>
+      </div>
+      <div class="apt-detail-extra">
+        <div style="font-weight:700; margin-bottom:6px; color:#2B241C;">구성 아파트별 내역</div>
+        ${rows || '<div class="small">상세 내역 없음</div>'}
+      </div>
+    `;
+  }
+
+  const areaLabel = areaLabelOf(r);
+  const addressLine = [r.region, r.address].filter(Boolean).join(" ");
+  const buildYearLine = r.buildYear ? `${r.buildYear}년 준공` : "";
+  const startFloorLine = (r.startFloorMin != null && r.startFloorMax != null)
+    ? `${ymLabel(startYm)} 거래 ${r.startFloorMin}~${r.startFloorMax}층`
+    : "";
+  const endFloorLine = (r.endFloorMin != null && r.endFloorMax != null)
+    ? `${ymLabel(endYm)} 거래 ${r.endFloorMin}~${r.endFloorMax}층`
+    : "";
+  const startNote = monthNote(r.startFoundYm, startYm, r.startCount);
+  const endNote = monthNote(r.endFoundYm, endYm, r.endCount);
+
+  return `
+    <div class="apt-detail-title">${r.name}</div>
+    <div class="apt-detail-sub">📍 ${addressLine || "주소 정보 없음"} · ${areaLabel}</div>
+    <div class="apt-detail-grid">
+      <div>
+        <div class="apt-detail-item-label">${ymLabel(startYm)} 평균</div>
+        <div class="apt-detail-item-value">${fmtEok(r.startAvg)}</div>
+        ${startNote}
+      </div>
+      <div>
+        <div class="apt-detail-item-label">${ymLabel(endYm)} 평균</div>
+        <div class="apt-detail-item-value">${fmtEok(r.endAvg)}</div>
+        ${endNote}
+      </div>
+      <div>
+        <div class="apt-detail-item-label">상승금액</div>
+        <div class="apt-detail-item-value ${cls}">${sign}${fmtEok(r.amount)}</div>
+      </div>
+      <div>
+        <div class="apt-detail-item-label">상승률</div>
+        <div class="apt-detail-item-value ${cls}">${sign}${r.rate.toFixed(1)}%</div>
+      </div>
+    </div>
+    <div class="apt-detail-extra">
+      ${buildYearLine ? `<div>🏢 ${buildYearLine}</div>` : ""}
+      ${startFloorLine ? `<div>🏬 ${startFloorLine}</div>` : ""}
+      ${endFloorLine ? `<div>🏬 ${endFloorLine}</div>` : ""}
+      <div>📊 거래건수: 시작월 ${r.startCount ?? "-"}건 · 종료월 ${r.endCount ?? "-"}건 (이상치/저층 필터 적용 후)</div>
+    </div>
+  `;
+}
+
+// ── 결과 영역: 조회 실패 목록 3개 초과 시 접힘/펼침 ──
+function toggleErrorRows() {
+  errorRowsExpanded = !errorRowsExpanded;
+  if (lastResults) renderResults();
+}
+
+function removeApt(kind, id) {
+  // id는 onclick 문자열에서 항상 문자열로 넘어오므로, 원본 배열의 숫자 id와도
+  // 비교되도록 String()으로 통일해서 비교한다.
+  if (kind === "owned") {
+    ownedApts = ownedApts.filter(a => String(a.id) !== String(id));
+    localStorage.setItem("apt_owned", JSON.stringify(ownedApts));
+  } else {
+    watchApts = watchApts.filter(a => String(a.id) !== String(id));
+    localStorage.setItem("apt_watch", JSON.stringify(watchApts));
+  }
+  renderAptList(kind);
+}
+
+// 국토부 API 응답(items)에서 이름이 정확히 일치하고 전용면적이 [areaMin, areaMax] 범위(오차 0.05㎡ 허용)
+// 안에 드는 거래만 뽑는다. 당월/과거월 조회 모두 동일한 기준으로 사용한다.
+function filterAptMatches(items, apt, areaMin, areaMax) {
+  return items.filter(it => {
+    const nm = (it.aptNm || "").trim();
+    const areaVal = parseFloat(it.excluUseAr);
+    return nm === apt.name && areaVal >= areaMin - 0.05 && areaVal <= areaMax + 0.05;
+  });
+}
+
+// 여러 (아파트, 기준월) 조회를 한꺼번에 받아 "월평균 거래가"를 찾는다. 각 조회는 독립적으로
+// 거래가 없으면 최대 6개월 이전까지 탐색하며, 판정 로직은 기존 findAvgPrice와 완전히 동일하다.
+// 차이는 실행 방식뿐: back(0~6개월 전) 라운드별로, 이번 라운드에 필요한 (지역코드, 연월) 조합을
+// 모아 fetchMonthCached로 "한 번에 병렬" 요청한다 — 같은 지역/같은 달이 여러 아파트에 필요하면
+// 실제 네트워크 호출은 1번만 나가고, 서로 다른 아파트/월 조회들도 순서대로 기다리지 않고 동시에 진행된다.
+// 개별 아파트는 매치를 찾는 즉시(원래처럼) 더 이상 이전 달을 조회하지 않는다.
+//
+// queries: [{ apt, targetYm, tag, floorYm? }]  (floorYm을 주면 그 달 이전으로는 대체 탐색하지 않음 —
+//          종료월 조회가 시작월보다 더 과거 데이터로 대체되어 "증가금액"이 역전되는 것을 막기 위함)
+// 반환: 각 항목에 .value (찾은 결과 또는 null) 와 .error (7개월 연속 API 실패 시 Error) 를 채워 돌려준다.
+//        찾지 못한 경우 원래처럼 apt._diag 에 진단 메시지를 남긴다.
+async function resolvePriceQueries(queries, onProgress) {
+  const totalApts = new Set(queries.map(q => q.apt.id)).size;
+  const reportProgress = (pendingList) => {
+    if (!onProgress) return;
+    const aptIds = new Set(pendingList.map(p => p.apt.id));
+    let doneCount = 0;
+    aptIds.forEach(id => {
+      const qs = pendingList.filter(p => p.apt.id === id);
+      if (qs.every(p => p.resolved || p.error || p.stopped)) doneCount++;
+    });
+    onProgress(doneCount, totalApts);
+  };
+  const pending = queries.map(q => ({
+    ...q,
+    nameSeenAnywhere: false,
+    monthsWithData: 0,
+    monthsWithError: 0,
+    lastErrorMsg: null,
+    similarNamesSeen: new Set(),
+    resolved: false,
+    stopped: false, // floorYm에 막혀 더 이상 과거로 탐색할 수 없는 상태
+    value: null,
+    error: null,
+  }));
+
+  for (let back = 0; back <= 6 && pending.some(p => !p.resolved && !p.stopped); back++) {
+    const active = pending.filter(p => !p.resolved && !p.stopped);
+
+    // floorYm(예: 종료월 조회의 시작월 하한선)보다 앞선 달로는 대체 탐색하지 않음
+    active.forEach(p => {
+      const ym = addMonths(p.targetYm, -back);
+      if (p.floorYm && ym < p.floorYm) {
+        p.stopped = true;
+        return;
+      }
+      p._ymThisRound = ym;
+    });
+    const runnable = active.filter(p => !p.stopped);
+    if (runnable.length === 0) continue;
+
+    // 이번 라운드에 필요한 (지역코드, 연월) 조합을 중복 없이 모은다
+    const neededKeys = new Map(); // `${code}_${ym}` -> { regionCode, ym }
+    runnable.forEach(p => {
+      const key = `${p.apt.code}_${p._ymThisRound}`;
+      if (!neededKeys.has(key)) neededKeys.set(key, { regionCode: p.apt.code, ym: p._ymThisRound });
+    });
+
+    // 필요한 조합들을 전부 병렬로 요청 (동일 조합은 fetchMonthCached가 자동으로 1번만 호출)
+    const fetchEntries = Array.from(neededKeys.entries());
+    const fetchResults = await Promise.all(fetchEntries.map(async ([key, { regionCode, ym }]) => {
+      try {
+        const items = await fetchMonthCached(regionCode, ym);
+        return [key, { items, error: null }];
+      } catch (e) {
+        return [key, { items: null, error: e.message }];
+      }
+    }));
+    const byKey = new Map(fetchResults);
+
+    await Promise.all(runnable.map(async (p) => {
+      const key = `${p.apt.code}_${p._ymThisRound}`;
+      const { items, error } = byKey.get(key);
+      if (error) {
+        // 이 달은 API 에러(예: 코드 000 등) — 기록만 하고 이전 달 탐색은 계속 진행
+        p.monthsWithError++;
+        p.lastErrorMsg = error;
+        return;
+      }
+      p.monthsWithData++;
+      const areaMin = p.apt.areaMin !== undefined ? p.apt.areaMin : p.apt.area - 1;
+      const areaMax = p.apt.areaMax !== undefined ? p.apt.areaMax : p.apt.area + 1;
+      for (const it of items) {
+        const nm = (it.aptNm || "").trim();
+        if (nm === p.apt.name) p.nameSeenAnywhere = true;
+        // 완전일치는 아니지만 이름이 비슷한 경우(예: "OO 1단지" 등) 후보로 수집 — 진단용
+        if (nm && nm !== p.apt.name && (nm.includes(p.apt.name) || p.apt.name.includes(nm))) {
+          p.similarNamesSeen.add(nm);
+        }
+      }
+      const rawMatches = filterAptMatches(items, p.apt, areaMin, areaMax);
+
+      // 당월(이번 라운드 기준월) 표본이 적으면, 이상치 판정 기준값 보강을 위해 과거월치를 추가로
+      // 조회한다. 비교 기준(정제 후 거래 2건 이상)이 만들어질 때까지 최대 MAX_PAST_MONTHS_LOOKBACK
+      // 개월 전까지 한 달씩 순차적으로 넓혀가며 조회하고, 확보되면 그 시점에서 멈춘다.
+      // fetchMonthCached가 캐시하므로 다른 곳에서 이미 불러온 달이면 재요청하지 않음.
+      // 미래월은 절대 참조하지 않는다.
+      let pastMonthsRaw = [];
+      const step2Preview = cleanStep2(cleanStep1(rawMatches));
+      if (step2Preview.length > 0 && step2Preview.length <= SMALL_SAMPLE_THRESHOLD) {
+        let referenceCount = step2Preview.length;
+        for (let back = 1; back <= MAX_PAST_MONTHS_LOOKBACK && referenceCount < 2; back++) {
+          const pastYm = addMonths(p._ymThisRound, -back);
+          let pastItems = [];
+          try {
+            pastItems = await fetchMonthCached(p.apt.code, pastYm);
+          } catch (e) {
+            pastItems = []; // 과거월 조회 실패 시 참고 데이터 없이 다음 달로 계속 진행
+          }
+          const filteredPast = filterAptMatches(pastItems, p.apt, areaMin, areaMax);
+          const cleanedPast = cleanStep2(cleanStep1(filteredPast));
+          if (cleanedPast.length > 0) {
+            pastMonthsRaw.push({ items: filteredPast, weight: pastMonthWeight(back) });
+            referenceCount += cleanedPast.length;
+          }
+        }
+      }
+
+      const matches = cleanMatches(rawMatches, pastMonthsRaw);
+      if (matches.length > 0) {
+        const amounts = matches.map(dealAmountOf);
+        const avg = amounts.reduce((a, b) => a + b, 0) / amounts.length;
+        // 상세 플로팅 창에 보여줄 참고 정보 — 실제 평균 계산에는 영향 없음
+        const floors = matches.map(m => parseInt(String(m.floor || "").trim(), 10)).filter(Number.isFinite);
+        const floorMin = floors.length ? Math.min(...floors) : null;
+        const floorMax = floors.length ? Math.max(...floors) : null;
+        const buildYearMatch = matches.find(m => m.buildYear && String(m.buildYear).trim());
+        const buildYear = buildYearMatch ? String(buildYearMatch.buildYear).trim() : null;
+        p.value = { avg, foundYm: p._ymThisRound, count: amounts.length, floorMin, floorMax, buildYear };
+        p.resolved = true;
+      }
+    }));
+    reportProgress(pending);
+  }
+
+  // 끝내 못 찾은 항목들: 원인을 최대한 구체적으로 apt 객체에 남겨서 호출부에서 메시지로 보여줄 수 있게 함
+  for (const p of pending) {
+    if (p.resolved) continue;
+    if (p.monthsWithData === 0 && p.monthsWithError > 0) {
+      // 7개월 내내(혹은 시작월 하한에 막히기 전까지) API 자체가 에러만 반환한 경우 — 진짜 API/네트워크 문제
+      p.error = new Error(`API 응답 실패 (마지막 오류: ${p.lastErrorMsg})`);
+      continue;
+    }
+    if (!p.nameSeenAnywhere) {
+      let hint = p.stopped
+        ? "종료월이 시작월보다 앞선 달의 데이터로 대체되는 것을 막기 위해 시작월까지만 탐색했지만, 그 범위 안에서는 이 단지 이름이 한 번도 조회되지 않았습니다."
+        : "해당 지역 코드에서 이 이름의 단지가 최근 7개월간 한 번도 조회되지 않았습니다. 단지명 표기가 국토부 등록명과 다르거나(예: '○○1단지'처럼 단지 번호가 붙어 등록), 지역코드가 실제 소재지와 다를 수 있습니다.";
+      if (p.similarNamesSeen.size > 0) {
+        hint += ` (비슷한 이름 후보: ${Array.from(p.similarNamesSeen).slice(0, 5).join(", ")})`;
+      }
+      p.apt._diag = hint;
+    } else {
+      p.apt._diag = p.stopped
+        ? "단지명은 확인됐지만, 종료월이 시작월보다 앞선 달로 대체되지 않도록 시작월까지만 탐색한 범위 안에서는 지정한 평형의 거래가 없습니다. (시작월을 더 이르게 넓히면 찾을 수 있을 수 있습니다)"
+        : "단지명은 확인됐지만 지정한 평형(전용면적) 범위의 거래가 최근 7개월간 없습니다. 평형 범위를 다시 확인해보세요.";
+    }
+  }
+  reportProgress(pending);
+
+  return pending;
+}
+
+// forceRefresh: true면(=🔄 새로고침 버튼) 캐시를 비우고 국토부 API를 다시 조회한다.
+//   "조회하기"(forceRefresh=false)는 캐시를 비우지 않으므로, 시작월/종료월 중 이전과
+//   같은 값(같은 지역/월 조합)이 있으면 그 부분은 API 호출 없이 캐시에서 즉시 재사용된다.
+//   기간을 미세조정(예: 종료월만 한 달 옮김)해서 다시 조회할 때 특히 빨라진다.
+//   "새로고침"은 당일 새로 올라온 실거래 신고 등 최신 데이터를 강제로 다시 받고 싶을 때 쓴다.
+async function runCompare(forceRefresh) {
+  const myToken = ++compareRunToken;
+  const errEl = document.getElementById("compareError");
+  errEl.innerHTML = "";
+  if (ownedApts.length === 0) { errEl.innerHTML = `<div class="error-box">보유 아파트를 먼저 추가해주세요.</div>`; return; }
+  if (watchApts.length === 0) { errEl.innerHTML = `<div class="error-box">비교할 관심 아파트를 먼저 추가해주세요.</div>`; return; }
+  const startYm = document.getElementById("startYm").value.trim();
+  const endYm = document.getElementById("endYm").value.trim();
+  if (startYm.length !== 6 || endYm.length !== 6) { errEl.innerHTML = `<div class="error-box">비교 기간을 YYYYMM 형식으로 입력해주세요.</div>`; return; }
+  if (endYm < startYm) { errEl.innerHTML = `<div class="error-box">종료월이 시작월보다 앞설 수 없습니다. 기간을 다시 확인해주세요.</div>`; return; }
+
+  const btn = document.getElementById("compareBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const btnOrigLabel = "조회하기";
+  const refreshBtnOrigLabel = "🔄 새로고침";
+  btn.disabled = true; refreshBtn.disabled = true;
+  const runningLabel = forceRefresh ? "새로고침 중..." : "계산 중...";
+  btn.textContent = runningLabel;
+  refreshBtn.textContent = forceRefresh ? runningLabel : refreshBtnOrigLabel;
+  if (forceRefresh) monthDataCache.clear(); // 명시적 새로고침일 때만 캐시를 비워 항상 최신 데이터로 조회
+  try {
+    // 보유+관심 아파트의 시작월/종료월 조회를 전부 모아 한 번에 배치 처리한다.
+    // (기존에는 아파트마다 순서대로 하나씩 기다렸다가 다음 아파트를 조회 — 아파트 수가
+    //  많을수록 대기 시간이 선형으로 늘어났음. 이제는 지역/월이 겹치는 조회는 합쳐지고,
+    //  겹치지 않는 조회들은 동시에 진행된다.)
+    const queries = [];
+    ownedApts.forEach(apt => {
+      queries.push({ apt, targetYm: startYm, tag: `owned-start-${apt.id}` });
+      queries.push({ apt, targetYm: endYm, tag: `owned-end-${apt.id}`, floorYm: startYm });
+    });
+    watchApts.forEach(apt => {
+      queries.push({ apt, targetYm: startYm, tag: `watch-start-${apt.id}` });
+      queries.push({ apt, targetYm: endYm, tag: `watch-end-${apt.id}`, floorYm: startYm });
+    });
+    const totalAptsForProgress = ownedApts.length + watchApts.length;
+    const resolved = await resolvePriceQueries(queries, (done, total) => {
+      const label = `계산 중... (${done}/${total || totalAptsForProgress})`;
+      btn.textContent = label;
+    });
+    const byTag = new Map(resolved.map(p => [p.tag, p]));
+
+    // 1) 보유 아파트: 사람(owner)별로 그룹핑해 사람마다 별도의 합산 행을 만든다.
+    //    지인 프리셋 버튼(HS/DJ/YW/JW)으로 추가된 아파트는 공동소유가 아니라 각자의 개별 보유이므로,
+    //    한 행으로 합치지 않고 사람별로 나눠서 비교 결과에 표시한다. owner가 없는 항목(직접 검색해
+    //    추가한 경우)은 기존처럼 "보유 합산" 한 행으로 묶는다.
+    const ownedDetails = [];
+    const ownedErrorsByOwner = new Map(); // ownerKey("" = 미지정) -> [에러 설명, ...]
+    for (const apt of ownedApts) {
+      const sp = byTag.get(`owned-start-${apt.id}`);
+      const ep = byTag.get(`owned-end-${apt.id}`);
+      if (sp.error) throw new Error(`[보유: ${apt.name}] ${sp.error.message}`);
+      if (ep.error) throw new Error(`[보유: ${apt.name}] ${ep.error.message}`);
+      const startInfo = sp.value, endInfo = ep.value;
+      const ownerKey = apt.owner || "";
+      if (!startInfo || !endInfo) {
+        const diag = apt._diag ? ` — ${apt._diag}` : "";
+        if (!ownedErrorsByOwner.has(ownerKey)) ownedErrorsByOwner.set(ownerKey, []);
+        ownedErrorsByOwner.get(ownerKey).push(`${apt.name}(${apt.area}㎡)${diag}`);
+        continue;
+      }
+      ownedDetails.push({
+        ...apt, startAvg: startInfo.avg, endAvg: endInfo.avg,
+        startFoundYm: startInfo.foundYm, startCount: startInfo.count,
+        endFoundYm: endInfo.foundYm, endCount: endInfo.count,
+      });
+    }
+
+    // owner별로 묶는다. Map은 삽입 순서를 유지하므로 ownedApts에 추가된 순서(=버튼을 누른 순서)가
+    // 결과 순서에도 자연스럽게 반영된다.
+    const detailsByOwner = new Map();
+    ownedDetails.forEach(d => {
+      const key = d.owner || "";
+      if (!detailsByOwner.has(key)) detailsByOwner.set(key, []);
+      detailsByOwner.get(key).push(d);
+    });
+    // 그 사람의 아파트를 전부 못 찾은 경우(성공 0건)도 아래에서 에러 안내를 만들 수 있게 그룹 자체는 남겨둔다.
+    ownedErrorsByOwner.forEach((_, key) => { if (!detailsByOwner.has(key)) detailsByOwner.set(key, []); });
+
+    const ownedRows = [];
+    for (const [ownerKey, details] of detailsByOwner) {
+      if (details.length === 0) continue; // 이 사람은 전부 실패 — renderResults의 에러 안내에서 별도 표시
+      const startAvg = details.reduce((s, d) => s + d.startAvg, 0);
+      const endAvg = details.reduce((s, d) => s + d.endAvg, 0);
+      const amount = endAvg - startAvg;
+      const rate = (amount / startAvg) * 100;
+      const errNames = ownedErrorsByOwner.get(ownerKey) || [];
+      ownedRows.push({
+        id: `owned-${ownerKey || "default"}`,
+        kind: "보유합산",
+        owner: ownerKey || null,
+        name: ownerKey ? `${ownerKey} 합산` : `보유 합산 (${details.map(d => d.name).join(" + ")})`,
+        area: `${details.length}채`,
+        startAvg, endAvg, amount, rate,
+        incomplete: errNames.length > 0,
+        missingNames: errNames,
+        startSubstituted: details.some(d => d.startFoundYm !== startYm),
+        endSubstituted: details.some(d => d.endFoundYm !== endYm),
+        breakdown: details.map(d => ({
+          name: d.name, area: d.area,
+          startAvg: d.startAvg, endAvg: d.endAvg,
+          startFoundYm: d.startFoundYm, startCount: d.startCount,
+          endFoundYm: d.endFoundYm, endCount: d.endCount,
+          amount: d.endAvg - d.startAvg,
+          rate: d.startAvg !== 0 ? ((d.endAvg - d.startAvg) / d.startAvg) * 100 : 0,
+          assetShare: (d.endAvg / endAvg) * 100,
+          contribShare: amount !== 0 ? ((d.endAvg - d.startAvg) / amount) * 100 : 0,
+        })),
+      });
+    }
+    // 그룹 전체가 실패해 행이 아예 안 만들어진 사람들 — renderResults에서 안내 문구로 사용
+    const ownedFullyFailedOwners = [...detailsByOwner.entries()]
+      .filter(([, details]) => details.length === 0)
+      .map(([ownerKey]) => ({ owner: ownerKey || null, missingNames: ownedErrorsByOwner.get(ownerKey) || [] }));
+
+    // 2) 관심 아파트: 개별 비교
+    const watchRows = [];
+    for (const apt of watchApts) {
+      const sp = byTag.get(`watch-start-${apt.id}`);
+      const ep = byTag.get(`watch-end-${apt.id}`);
+      if (sp.error || ep.error) {
+        const msg = (sp.error || ep.error).message;
+        watchRows.push({ ...apt, kind: "관심", error: `[${apt.name}] ${msg}` });
+        continue;
+      }
+      const startInfo = sp.value, endInfo = ep.value;
+      if (!startInfo || !endInfo) {
+        const diag = apt._diag ? ` ${apt._diag}` : "";
+        watchRows.push({ ...apt, kind: "관심", error: `해당 기간에 거래 데이터를 찾지 못했습니다.${diag}` });
+        continue;
+      }
+      const amount = endInfo.avg - startInfo.avg;
+      const rate = (amount / startInfo.avg) * 100;
+      watchRows.push({
+        ...apt, kind: "관심", startAvg: startInfo.avg, endAvg: endInfo.avg, amount, rate,
+        startFoundYm: startInfo.foundYm, startCount: startInfo.count,
+        endFoundYm: endInfo.foundYm, endCount: endInfo.count,
+        buildYear: endInfo.buildYear || startInfo.buildYear || null,
+        startFloorMin: startInfo.floorMin, startFloorMax: startInfo.floorMax,
+        endFloorMin: endInfo.floorMin, endFloorMax: endInfo.floorMax,
+      });
+    }
+
+    // 조회하는 동안 더 최신 요청(연속 클릭 등)이 들어왔다면, 이 낡은 결과로
+    // 화면을 덮어쓰지 않고 조용히 버린다.
+    if (myToken !== compareRunToken) return;
+
+    lastResults = { ownedRows, ownedFullyFailedOwners, watchRows, startYm, endYm };
+    errorRowsExpanded = false;
+    renderResults();
+  } catch (e) {
+    if (myToken !== compareRunToken) return; // 낡은 요청의 에러는 최신 화면 상태를 덮어쓰지 않는다.
+    errEl.innerHTML = `<div class="error-box">데이터를 불러오지 못했습니다: ${e.message}</div>`;
+  } finally {
+    if (myToken === compareRunToken) {
+      btn.disabled = false; btn.textContent = btnOrigLabel;
+      refreshBtn.disabled = false; refreshBtn.textContent = refreshBtnOrigLabel;
+    }
+  }
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  document.getElementById("sortAmountBtn").classList.toggle("active", mode === "amount");
+  document.getElementById("sortRateBtn").classList.toggle("active", mode === "rate");
+  if (lastResults) renderResults();
+}
+
+function renderResults() {
+  const { ownedRows, ownedFullyFailedOwners, watchRows, startYm, endYm } = lastResults;
+  document.getElementById("resultsSection").style.display = "block";
+  document.getElementById("resultPeriodLabel").textContent = `${ymLabel(startYm)} → ${ymLabel(endYm)} 기준`;
+
+  const validWatch = watchRows.filter(r => !r.error);
+  const errorRows = watchRows.filter(r => r.error);
+  const allValid = [...ownedRows, ...validWatch];
+  const sorted = [...allValid].sort((a, b) => sortMode === "amount" ? b.amount - a.amount : b.rate - a.rate);
+  const maxAbs = sorted.length ? Math.max(...sorted.map(r => Math.abs(r.amount))) : 1;
+
+  currentRowsById = new Map(sorted.map(r => [String(r.id), r]));
+
+  document.getElementById("barChart").innerHTML = sorted.map(r => {
+    const widthPct = Math.max(4, (Math.abs(r.amount) / maxAbs) * 100);
+    const isUp = r.amount >= 0;
+    const badgeClass = r.kind === "보유합산" ? "badge-owned" : "badge-watch";
+    const areaLabel = r.kind === "보유합산" ? r.area : areaLabelOf(r);
+    return `
+      <div class="bar-row" onclick="openAptDetailModal('${r.id}')" style="cursor:pointer;">
+        <div class="bar-label">
+          <span><span class="badge ${badgeClass}">${r.kind}</span> ${r.name} <span class="small">(${areaLabel})</span></span>
+          <span class="${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${fmtEok(r.amount)} (${isUp ? '+' : ''}${r.rate.toFixed(1)}%)</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${widthPct}%; background:${isUp ? 'linear-gradient(90deg,#B8863B,#D9B571)' : 'linear-gradient(90deg,#C24545,#DE8080)'}"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const errItems = [];
+  errorRows.forEach(r => errItems.push(`⚠ ${r.name} (${areaLabelOf(r)}): ${r.error}`));
+  ownedRows.filter(r => r.incomplete).forEach(r => {
+    errItems.push(`⚠ ${r.name}에서 다음 아파트는 거래 데이터를 찾지 못해 제외되었습니다: ${r.missingNames.join(", ")}`);
+  });
+  ownedFullyFailedOwners.forEach(f => {
+    const who = f.owner ? `${f.owner} 합산` : "보유 합산";
+    errItems.push(`⚠ ${who}은 거래 데이터를 하나도 찾지 못해 비교에서 제외되었습니다: ${f.missingNames.join(", ")}`);
+  });
+  if (ownedRows.length === 0 && ownedFullyFailedOwners.length === 0) {
+    errItems.push(`⚠ 보유 아파트의 거래 데이터를 하나도 찾지 못해 합산 비교를 할 수 없었습니다.`);
+  }
+  const errEl2 = document.getElementById("errorRows");
+  if (errItems.length === 0) {
+    errEl2.innerHTML = "";
+  } else if (errItems.length <= 3) {
+    errEl2.innerHTML = errItems.map(t => `<div>${t}</div>`).join("");
+  } else {
+    errEl2.innerHTML = `
+      <div>
+        <button class="btn-link" style="padding:0; font-weight:700;" onclick="toggleErrorRows()">
+          ⚠ ${errItems.length}개 조회 실패 (${errorRowsExpanded ? "접기" : "펼쳐보기"})
+        </button>
+      </div>
+      <div id="errorRowsDetail" style="display:${errorRowsExpanded ? "block" : "none"}; margin-top:6px;">
+        ${errItems.map(t => `<div>${t}</div>`).join("")}
+      </div>
+    `;
+  }
+}
+
+</script>
+</body>
+</html>
